@@ -1,0 +1,79 @@
+<!-- SECCIÓN: GESTIÓN DE PROFESORES - tabla de docentes con especialidad y cursos a cargo. -->
+<section id="section-profesores" class="content-section">
+    <h2 class="section-title">Gestión de Profesores</h2>
+    <p class="section-subtitle">Administra los docentes de la institución y sus asignaciones</p>
+
+    <div class="flex-between mt-6 mb-4">
+        <div class="search-box">
+            <input type="text" placeholder="Buscar profesor por nombre o especialidad...">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+        <button class="btn btn-primary" id="btn-nuevo-profesor">+ Nuevo Profesor</button>
+    </div>
+
+    <div class="card">
+        <div class="table-container">
+            <table class="data-table" id="tablaProfesores">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre completo</th>
+                        <th>Especialidad</th>
+                        <th>Cursos a cargo</th>
+                        <th>Correo</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoProfesores">
+                    <tr>
+                        <td colspan="7" class="text-gray-500" style="text-align:center;">Cargando profesores...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal: crear un nuevo profesor -->
+    <div class="modal-overlay" id="modal-profesor">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Nuevo profesor</h3>
+                <button class="modal-close" data-cerrar="modal-profesor" title="Cerrar">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <form id="form-profesor">
+                    <div class="form-group">
+                        <label for="profesor-nombre">Nombre completo</label>
+                        <input type="text" id="profesor-nombre" name="nombre" class="form-control" required>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="profesor-especialidad">Especialidad</label>
+                            <input type="text" id="profesor-especialidad" name="especialidad" class="form-control" placeholder="Informática">
+                        </div>
+                        <div class="form-group">
+                            <label for="profesor-correo">Correo</label>
+                            <input type="email" id="profesor-correo" name="correo" class="form-control" placeholder="opcional">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profesor-estado">Estado</label>
+                        <select id="profesor-estado" name="estado" class="form-control">
+                            <option value="activo">Activo</option>
+                            <option value="inactivo">Inactivo</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" data-cerrar="modal-profesor">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar profesor</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,93 @@
+<!-- SECCIÓN: GESTIÓN DE CURSOS - tabla de cursos con código, profesor, semestre y estado. -->
+<section id="section-cursos" class="content-section">
+    <h2 class="section-title">Gestión de Cursos</h2>
+    <p class="section-subtitle">Administra la información, grupos y asignación de profesores</p>
+
+    <div class="flex-between mt-6 mb-4">
+        <div class="search-box">
+            <input type="text" placeholder="Buscar curso por nombre o código...">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+        <button class="btn btn-primary" id="btn-nuevo-curso">+ Nuevo Curso</button>
+    </div>
+
+    <div class="card">
+        <div class="table-container">
+            <table class="data-table" id="tablaCursos">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre del curso</th>
+                        <th>Profesor asignado</th>
+                        <th>Estudiantes</th>
+                        <th>Semestre</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoCursos">
+                    <tr>
+                        <td colspan="7" class="text-gray-500" style="text-align:center;">Cargando cursos...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal: crear un nuevo curso -->
+    <div class="modal-overlay" id="modal-curso">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Nuevo curso</h3>
+                <button class="modal-close" data-cerrar="modal-curso" title="Cerrar">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <form id="form-curso">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="curso-codigo">Código</label>
+                            <input type="text" id="curso-codigo" name="codigo" class="form-control" placeholder="PROG-101" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="curso-nombre">Nombre del curso</label>
+                            <input type="text" id="curso-nombre" name="nombre" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="curso-profesor">Profesor asignado</label>
+                            <!-- Llenado por front/js/gestion.js desde /api/profesores -->
+                            <select id="curso-profesor" name="profesor" class="form-control"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="curso-estudiantes">N° estudiantes</label>
+                            <input type="number" id="curso-estudiantes" name="estudiantes" class="form-control" value="0" min="0">
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="curso-semestre">Semestre</label>
+                            <input type="text" id="curso-semestre" name="semestre" class="form-control" placeholder="1° 2026">
+                        </div>
+                        <div class="form-group">
+                            <label for="curso-estado">Estado</label>
+                            <select id="curso-estado" name="estado" class="form-control">
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                                <option value="finalizado">Finalizado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" data-cerrar="modal-curso">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar curso</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

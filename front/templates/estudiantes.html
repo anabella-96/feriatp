@@ -1,0 +1,121 @@
+
+
+{#Los estudinates hay que modificarlos ya que estan escritos como profesores#}
+
+<!-- SECCIÓN: GESTIÓN DE ESTUDIANTES - los IDs de la tabla coinciden con las fotos
+     de back/imagenes_conocidas/ para el reconocimiento facial (ej: 20231045.jpg). -->
+<section id="section-estudiantes" class="content-section">
+    <h2 class="section-title">Gestión de Estudiantes</h2>
+    <p class="section-subtitle">Registro, edición y seguimiento de asistencia por alumno</p>
+
+    <div class="flex-between mt-6 mb-4">
+        <div class="filters-inline">
+            <input type="text" class="form-control w-250" placeholder="Buscar por nombre o ID...">
+            <select class="form-control w-150">
+                <option>Todos los cursos</option>
+                <option>Programación </option>
+                <option>Matemáticas </option>
+                <option>Base de Datos</option>
+                <option>Ciencias </option>
+            </select>
+            <select class="form-control w-150">
+                <option>Todos los estados</option>
+                <option>Activo</option>
+                <option>Inactivo</option>
+                <option>Ausente</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" id="btn-nuevo-estudiante">+ Nuevo Estudiante</button>
+    </div>
+
+    <div class="card">
+        <div class="table-container">
+            <table class="data-table" id="tablaEstudiantes">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre completo</th>
+                        <th>Correo electrónico</th>
+                        <th>Curso asignado</th>
+                        <th>Asistencia</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoEstudiantes">
+                    <tr>
+                        <td colspan="7" class="text-gray-500" style="text-align:center;">Cargando estudiantes...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal: crear un nuevo estudiante -->
+    <div class="modal-overlay" id="modal-estudiante">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Nuevo estudiante</h3>
+                <button class="modal-close" data-cerrar="modal-estudiante" title="Cerrar">&times;</button>
+            </div>
+
+            <!-- Paso 1: formulario de datos -->
+            <div class="modal-body">
+                <form id="form-estudiante">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="estudiante-nombre">Nombre</label>
+                            <input type="text" id="estudiante-nombre" name="nombre" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="estudiante-apellido">Apellido</label>
+                            <input type="text" id="estudiante-apellido" name="apellido" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="estudiante-correo">Correo electrónico</label>
+                        <input type="email" id="estudiante-correo" name="correo" class="form-control" placeholder="opcional">
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="estudiante-curso">Curso asignado</label>
+                            <!-- Llenado por front/js/gestion.js desde /api/cursos -->
+                            <select id="estudiante-curso" name="curso" class="form-control"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="estudiante-estado">Estado</label>
+                            <select id="estudiante-estado" name="estado" class="form-control">
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                                <option value="ausente">Ausente</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" data-cerrar="modal-estudiante">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar estudiante</button>
+                    </div>
+                </form>
+
+                <!-- Paso 2 (se muestra tras crear): matrícula generada + registrar rostro -->
+                <div id="resultado-estudiante" style="display:none;">
+                    <p class="text-sm text-gray-500">Estudiante creado con la matrícula:</p>
+                    <p class="id-destacado" id="id-estudiante-nuevo"></p>
+                    <p class="text-sm text-gray-500" id="nombre-estudiante-nuevo"></p>
+                    <p class="text-xs text-gray-500" style="margin-top:0.75rem;">
+                        Usa esta matrícula para registrar su rostro y que pueda marcar asistencia con la cámara.
+                    </p>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" data-cerrar="modal-estudiante">Cerrar</button>
+                        <button type="button" class="btn btn-primary" id="btn-ir-rostro">
+                            <i class="fa-solid fa-id-badge"></i> Registrar su rostro
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,90 @@
+<!-- SECCIÓN: DASHBOARD - estadísticas con gráficos Chart.js (#chartAsistencia, #chartEstados) y tabla de rendimiento por curso. -->
+<section id="section-dashboard" class="content-section">
+    <h2 class="section-title">Panel de Control</h2>
+    <p class="section-subtitle">Estadísticas detalladas y tendencias del sistema</p>
+
+    <div class="grid-layout mt-6">
+        <div class="col-main">
+            <div class="card">
+                <h3 class="card-title">Evolución de asistencia mensual</h3>
+                <div class="chart-container">
+                    <canvas id="chartAsistencia"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-side">
+            <div class="card">
+                <h3 class="card-title">Distribución de estados</h3>
+                <div class="chart-container">
+                    <canvas id="chartEstados"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-6">
+        <h3 class="card-title">Rendimiento por curso</h3>
+        <div class="table-container">
+            <table class="data-table" id="tablaCursosRendimiento">
+                <thead>
+                    <tr>
+                        <th>Curso</th>
+                        <th>Estudiantes</th>
+                        <th>Asistencia</th>
+                        <th>Presentes</th>
+                        <th>Ausentes</th>
+                        <th>Tardanzas</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Programación I</td>
+                        <td>45</td>
+                        <td><div class="progress-bar"><div style="width:94%"></div></div> 94%</td>
+                        <td>42</td>
+                        <td>2</td>
+                        <td>1</td>
+                        <td><span class="status active">Activo</span></td>
+                    </tr>
+                    <tr>
+                        <td>Matemáticas</td>
+                        <td>38</td>
+                        <td><div class="progress-bar"><div style="width:88%"></div></div> 88%</td>
+                        <td>33</td>
+                        <td>4</td>
+                        <td>1</td>
+                        <td><span class="status active">Activo</span></td>
+                    </tr>
+                    <tr>
+                        <td>Base de Datos</td>
+                        <td>42</td>
+                        <td><div class="progress-bar"><div style="width:91%"></div></div> 91%</td>
+                        <td>38</td>
+                        <td>3</td>
+                        <td>1</td>
+                        <td><span class="status active">Activo</span></td>
+                    </tr>
+                    <tr>
+                        <td>Ciencias</td>
+                        <td>50</td>
+                        <td><div class="progress-bar"><div style="width:85%"></div></div> 85%</td>
+                        <td>42</td>
+                        <td>6</td>
+                        <td>2</td>
+                        <td><span class="status active">Activo</span></td>
+                    </tr>
+                    <tr>
+                        <td>Redes de Computadoras</td>
+                        <td>36</td>
+                        <td><div class="progress-bar"><div style="width:92%"></div></div> 92%</td>
+                        <td>33</td>
+                        <td>2</td>
+                        <td>1</td>
+                        <td><span class="status active">Activo</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

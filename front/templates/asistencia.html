@@ -1,0 +1,179 @@
+<!-- =============================================================================
+     SECCIÓN: ASISTENCIA EN TIEMPO REAL  (front/templates/asistencia.html)
+
+     Es la sección más importante del sistema: contiene la CÁMARA y los
+     botones de reconocimiento facial.
+
+     ELEMENTOS QUE USA front/js/script.js (IDS OBLIGATORIOS):
+       #video                         -> muestra el flujo de la cámara
+       #canvas                        -> canvas oculto donde se copia el frame
+       #camera-placeholder            -> capa gris "Cámara inactiva"
+       #btn-iniciar-camara            -> botón principal para encender la cámara
+       #btn-capturar                  -> botón para REGISTRAR ASISTENCIA (/reconocer)
+       #btn-registrar-rostro          -> botón para REGISTRAR UN ROSTRO NUEVO
+       #input-alumno-registrar        -> input con el ID del alumno a registrar
+       #asistencia-status-badge etc.  -> panel de estado que se actualiza tras reconocer
+============================================================================= -->
+<section id="section-asistencia" class="content-section">
+    <h2 class="section-title">Asistencia en Tiempo Real</h2>
+    <p class="section-subtitle">Registro automático mediante reconocimiento facial</p>
+
+    <div class="grid-layout mt-6">
+        <div class="col-main">
+            <div class="card">
+                <div class="flex-between">
+                    <h3 class="card-title">Sesión actual: Programación </h3>
+                    <select class="form-control w-auto">
+                        <option>Cambiar sesión</option>
+                        <option>Matemáticas - Grupo B</option>
+                        <option>Base de Datos - Grupo C</option>
+                    </select>
+                </div>
+                <p class="text-sm text-gray-500 mb-4">Fecha: 07/07/2026 | Hora: 10:00 - 11:30 | Profesor: Fernando Ojeda</p>
+
+                <div class="camera-container">
+                    <div class="camera-view" style="position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #111827; border-radius: 8px; height: 350px;">
+                        <video id="video" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                        <canvas id="canvas" width="400" height="300" style="display: none;"></canvas>
+                        <div id="camera-placeholder" style="position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: white; width: 100%; height: 100%; top: 0; left: 0; background-color: #111827; z-index: 2;">
+                            <i class="fa-solid fa-video fa-4x text-gray-300"></i>
+                            <p id="camera-placeholder-text">Cámara inactiva - Presiona "Iniciar cámara"</p>
+                        </div>
+                    </div>
+
+                    <div class="camera-controls" style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center;">
+                        <button id="btn-iniciar-camara" class="btn btn-primary" style="padding: 0.75rem 1.5rem; background-color: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                            <i class="fa-solid fa-video"></i> Iniciar cámara
+                        </button>
+                        <button id="btn-capturar" class="btn btn-success" style="padding: 0.75rem 1.5rem; background-color: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                            <i class="fa-solid fa-camera"></i> Registrar asistencia
+                        </button>
+                    </div>
+
+                    <div id="resultado-container" class="resultado-box" style="margin-top: 1rem; padding: 0.75rem; border-radius: 6px; text-align: center; font-weight: 500; min-height: 40px; display: none;">
+                        <span id="resultado"></span>
+                    </div>
+
+                    <div class="camera-status" style="margin-top: 1rem;">
+                        <span class="status-badge" id="asistencia-status-badge" style="background-color: #e5e7eb; color: #374151; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">Inactivo</span>
+                        <p id="asistencia-nombre" style="margin-top: 0.5rem; font-weight: 500;">Última detección: Ninguna</p>
+                        <p class="text-xs" id="asistencia-hora" style="font-size: 0.75rem; color: #6b7280;">Hora: --:--:--</p>
+                        <p class="text-xs" id="asistencia-confianza" style="font-size: 0.75rem; color: #6b7280;">Confianza: --%</p>
+                        <div class="mt-4" style="margin-top: 1rem;">
+                            <p class="text-sm font-medium" id="asistencia-contador" style="font-size: 0.875rem;">Total registrados: 32 / 45</p>
+                            <div class="progress-bar mt-1" style="background-color: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 0.25rem;">
+                                <div id="asistencia-progreso-bar" style="width:71%; background-color: #2563eb; height: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="resultado-reconocimiento" style="margin-top: 0.5rem; padding: 0.5rem; border-radius: var(--radius); text-align: center; font-size: 0.85rem; font-weight: 500; display: none;"></div>
+            </div>
+
+            <div class="card mt-6">
+                <h3 class="card-title">Registrar nuevo rostro</h3>
+                <p class="text-sm text-gray-500 mb-4">Ingresa el ID del alumno (debe existir en la base de datos), enciende la cámara y presiona el botón para guardar su rostro. La foto quedará disponible para el reconocimiento.</p>
+                <div class="flex-between" style="gap: 1rem; flex-wrap: wrap;">
+                    <input type="number" id="input-alumno-registrar" class="form-control" placeholder="ID del alumno (ej: 20231045)" style="max-width: 260px;">
+                    <button id="btn-registrar-rostro" class="btn btn-primary" style="padding: 0.75rem 1.5rem; background-color: #7c3aed; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                        <i class="fa-solid fa-user-plus"></i> Registrar rostro
+                    </button>
+                </div>
+                <div id="registro-rostro-resultado" class="resultado-box" style="margin-top: 1rem; padding: 0.75rem; border-radius: 6px; text-align: center; font-weight: 500; min-height: 40px; display: none;"></div>
+            </div>
+
+            <div class="card mt-6">
+                <h3 class="card-title">Registro de asistencia hoy</h3>
+                <div class="table-container">
+                    <table class="data-table" id="tablaRegistroHoy">
+                        <thead>
+                            <tr>
+                                <th>Hora</th>
+                                <th>Estudiante</th>
+                                <th>ID</th>
+                                <th>Curso</th>
+                                <th>Confianza</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>10:15:22</td>
+                                <td>Fernando Ojeda</td>
+                                <td>20231045</td>
+                                <td>Programación </td>
+                                <td>98%</td>
+                                <td><span class="status present">Registrado</span></td>
+                                <td><button class="btn-icon"><i class="fa-solid fa-pen"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>10:16:05</td>
+                                <td>Carolina Moreno</td>
+                                <td>20231052</td>
+                                <td>Base de datos</td>
+                                <td>96%</td>
+                                <td><span class="status present">Registrado</span></td>
+                                <td><button class="btn-icon"><i class="fa-solid fa-pen"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>10:17:12</td>
+                                <td>Liza Molina</td>
+                                <td>20231061</td>
+                                <td>Base de datos</td>
+                                <td>92%</td>
+                                <td><span class="status present">Registrado</span></td>
+                                <td><button class="btn-icon"><i class="fa-solid fa-pen"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>10:18:45</td>
+                                <td>Lucas Reyes</td>
+                                <td>20231078</td>
+                                <td>Ciencias </td>
+                                <td>89%</td>
+                                <td><span class="status warning">Verificación</span></td>
+                                <td><button class="btn-icon"><i class="fa-solid fa-check"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-side">
+            <div class="card">
+                <h3 class="card-title">Resumen de sesión</h3>
+                <div class="stats-grid">
+                    <div class="stat-box bg-green">
+                        <p class="stat-value">32</p>
+                        <p class="stat-label">Presentes</p>
+                    </div>
+                    <div class="stat-box bg-red">
+                        <p class="stat-value">8</p>
+                        <p class="stat-label">Ausentes</p>
+                    </div>
+                    <div class="stat-box bg-yellow">
+                        <p class="stat-value">2</p>
+                        <p class="stat-label">Tardanzas</p>
+                    </div>
+                    <div class="stat-box bg-blue">
+                        <p class="stat-value">78%</p>
+                        <p class="stat-label">Asistencia</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-6">
+                <h3 class="card-title">Controles de sesión</h3>
+                <div class="controls-list">
+                    <button class="btn btn-primary w-full" id="btn-iniciar-camara-side">Iniciar sesión / cámara</button>
+                    <button class="btn btn-secondary w-full" id="btn-detener-camara">Pausar reconocimiento</button>
+                    <button class="btn btn-warning w-full" id="btn-capturar-asistencia">📸 Registrar asistencia</button>
+                    <button class="btn btn-outline w-full">Exportar registro</button>
+                    <button class="btn btn-danger w-full">Finalizar sesión</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

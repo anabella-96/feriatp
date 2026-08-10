@@ -1,0 +1,85 @@
+<!-- SECCIÓN: GESTIÓN DE USUARIOS - cuentas de acceso con su rol y estado. -->
+<section id="section-usuarios" class="content-section">
+    <h2 class="section-title">Gestión de Usuarios</h2>
+    <p class="section-subtitle">Control de accesos, cuentas y datos de acceso al sistema</p>
+
+    <div class="flex-between mt-6 mb-4">
+        <div class="search-box">
+            <input type="text" placeholder="Buscar por usuario o correo...">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+        <button class="btn btn-primary">+ Nuevo Usuario</button>
+    </div>
+
+    <div class="card">
+        <div class="table-container">
+            <table class="data-table" id="tablaUsuarios">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Nombre completo</th>
+                        <th>Correo</th>
+                        <th>Rol asignado</th>
+                        <th>Último acceso</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>carlosr</td>
+                        <td>Carlos Ramírez</td>
+                        <td>admin@asistec.edu</td>
+                        <td>Administrador</td>
+                        <td>07/07/2026 08:10</td>
+                        <td><span class="status active">Activo</span></td>
+                        <td>
+                            <button class="btn-icon"><i class="fa-solid fa-key"></i></button>
+                            <button class="btn-icon"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon"><i class="fa-solid fa-ban text-danger"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>luism</td>
+                        <td>Luis Martínez</td>
+                        <td>luis@asistec.edu</td>
+                        <td>Profesor</td>
+                        <td>07/07/2026 07:45</td>
+                        <td><span class="status active">Activo</span></td>
+                        <td>
+                            <button class="btn-icon"><i class="fa-solid fa-key"></i></button>
+                            <button class="btn-icon"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon"><i class="fa-solid fa-ban text-danger"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>anar</td>
+                        <td>Ana Ruiz</td>
+                        <td>ana@asistec.edu</td>
+                        <td>Profesor</td>
+                        <td>06/07/2026 16:20</td>
+                        <td><span class="status active">Activo</span></td>
+                        <td>
+                            <button class="btn-icon"><i class="fa-solid fa-key"></i></button>
+                            <button class="btn-icon"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon"><i class="fa-solid fa-ban text-danger"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>sofiah</td>
+                        <td>Sofía Herrera</td>
+                        <td>sofia@asistec.edu</td>
+                        <td>Profesor</td>
+                        <td>01/07/2026 09:05</td>
+                        <td><span class="status blocked">Bloqueado</span></td>
+                        <td>
+                            <button class="btn-icon"><i class="fa-solid fa-key"></i></button>
+                            <button class="btn-icon"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon"><i class="fa-solid fa-unlock text-success"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

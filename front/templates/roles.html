@@ -1,0 +1,89 @@
+<!-- SECCIÓN: ROLES Y PERMISOS - matriz de permisos por rol; el select #selectorRol es controlado por script.js. -->
+<section id="section-roles" class="content-section">
+    <h2 class="section-title">Roles y Permisos</h2>
+    <p class="section-subtitle">Define qué acciones puede realizar cada tipo de usuario</p>
+
+    <div class="grid-layout mt-6">
+        <div class="col-main">
+            <div class="card">
+                <h3 class="card-title">Configuración de permisos</h3>
+                <div class="form-group mb-4">
+                    <label class="font-medium">Seleccionar rol:</label>
+                    <select class="form-control w-250 mt-1" id="selectorRol">
+                        <option value="admin">Administrador</option>
+                        <option value="profesor">Profesor</option>
+                        <option value="estudiante">Estudiante</option>
+                        <option value="invitado">Invitado</option>
+                    </select>
+                </div>
+
+                <div class="permisos-grid">
+                    <div class="permiso-item">
+                        <input type="checkbox" id="permiso_ver" checked>
+                        <label for="permiso_ver">Ver información general</label>
+                    </div>
+                    <div class="permiso-item">
+                        <input type="checkbox" id="permiso_editar" checked>
+                        <label for="permiso_editar">Editar registros</label>
+                    </div>
+                    <div class="permiso-item">
+                        <input type="checkbox" id="permiso_eliminar" checked>
+                        <label for="permiso_eliminar">Eliminar registros</label>
+                    </div>
+                    <div class="permiso-item">
+                        <input type="checkbox" id="permiso_crear_usuarios" checked>
+                        <label for="permiso_crear_usuarios">Crear y gestionar usuarios</label>
+                    </div>
+                    <div class="permiso-item">
+                        <input type="checkbox" id="permiso_roles" checked>
+                        <label for="permiso_roles">Modificar roles y permisos</label>
+                    </div>
+                    <div class="permiso-item">
+                        <input type="checkbox" id="permiso_reportes" checked>
+                        <label for="permiso_reportes">Generar y descargar reportes</label>
+                    </div>
+                    <div class="permiso-item">
+                        <input type="checkbox" id="permiso_asistencia" checked>
+                        <label for="permiso_asistencia">Gestionar sesiones y asistencia</label>
+                    </div>
+                    <div class="permiso-item">
+                        <input type="checkbox" id="permiso_configuracion" checked>
+                        <label for="permiso_configuracion">Acceder a configuración del sistema</label>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex-end">
+                    <button class="btn btn-primary">Guardar cambios de permisos</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-side">
+            <div class="card">
+                <h3 class="card-title">Resumen de roles</h3>
+                <ul class="roles-list">
+                    <li>
+                        <span class="role-name">Administrador</span>
+                        <span class="role-count">2 usuarios</span>
+                        <p class="text-xs text-gray-500">Acceso total al sistema</p>
+                    </li>
+                    <li>
+                        <span class="role-name">Profesor</span>
+                        <span class="role-count">86 usuarios</span>
+                        <p class="text-xs text-gray-500">Gestiona cursos y asistencia</p>
+                    </li>
+                    <li>
+                        <span class="role-name">Estudiante</span>
+                        <span class="role-count">1248 usuarios</span>
+                        <p class="text-xs text-gray-500">Solo consulta de su información</p>
+                    </li>
+                    <li>
+                        <span class="role-name">Invitado</span>
+                        <span class="role-count">3 usuarios</span>
+                        <p class="text-xs text-gray-500">Acceso limitado solo a reportes públicos</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>

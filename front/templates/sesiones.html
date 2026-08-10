@@ -1,0 +1,105 @@
+<!-- SECCIÓN: GESTIÓN DE SESIONES - clases programadas por curso (fecha, horario, profesor, estado). -->
+<section id="section-sesiones" class="content-section">
+    <h2 class="section-title">Gestión de Sesiones</h2>
+    <p class="section-subtitle">Programación, seguimiento y control de cada clase</p>
+
+    <div class="flex-between mt-6 mb-4">
+        <div class="filters-inline">
+            <input type="date" class="form-control w-150">
+            <select class="form-control w-200">
+                <option>Todos los cursos</option>
+                <option>Programación I</option>
+                <option>Matemáticas II</option>
+            </select>
+            <select class="form-control w-150">
+                <option>Todos los estados</option>
+                <option>Programada</option>
+                <option>En curso</option>
+                <option>Finalizada</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" id="btn-nueva-sesion">+ Nueva Sesión</button>
+    </div>
+
+    <div class="card">
+        <div class="table-container">
+            <table class="data-table" id="tablaSesiones">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Horario</th>
+                        <th>Curso</th>
+                        <th>Profesor</th>
+                        <th>Total alumnos</th>
+                        <th>Asistencia</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoSesiones">
+                    <tr>
+                        <td colspan="8" class="text-gray-500" style="text-align:center;">Cargando sesiones...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal: crear una nueva sesión -->
+    <div class="modal-overlay" id="modal-sesion">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Nueva sesión</h3>
+                <button class="modal-close" data-cerrar="modal-sesion" title="Cerrar">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <form id="form-sesion">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="sesion-fecha">Fecha</label>
+                            <input type="date" id="sesion-fecha" name="fecha" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="sesion-horario">Horario</label>
+                            <input type="text" id="sesion-horario" name="horario" class="form-control" placeholder="10:00 - 11:30">
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="sesion-curso">Curso</label>
+                            <!-- Llenado por front/js/gestion.js desde /api/cursos -->
+                            <select id="sesion-curso" name="curso" class="form-control"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="sesion-profesor">Profesor</label>
+                            <!-- Llenado por front/js/gestion.js desde /api/profesores -->
+                            <select id="sesion-profesor" name="profesor" class="form-control"></select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="sesion-total">Total alumnos</label>
+                            <input type="number" id="sesion-total" name="total_alumnos" class="form-control" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="sesion-estado">Estado</label>
+                            <select id="sesion-estado" name="estado" class="form-control">
+                                <option value="programada">Programada</option>
+                                <option value="en_curso">En curso</option>
+                                <option value="finalizada">Finalizada</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" data-cerrar="modal-sesion">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar sesión</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

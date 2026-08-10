@@ -1,0 +1,117 @@
+<!-- SECCIÓN: REPORTES - filtros y listado de reportes generados (por ahora datos de ejemplo). -->
+<section id="section-reportes" class="content-section">
+    <h2 class="section-title">Reportes y Estadísticas</h2>
+    <p class="section-subtitle">Genera, visualiza y descarga informes detallados</p>
+
+    <div class="card mt-6">
+        <h3 class="card-title">Filtros avanzados</h3>
+        <div class="filters-grid">
+            <div class="filter-group">
+                <label>Tipo de reporte</label>
+                <select class="form-control">
+                    <option>Asistencia por curso</option>
+                    <option>Asistencia por estudiante</option>
+                    <option>Reporte mensual</option>
+                    <option>Reporte semestral</option>
+                    <option>Comparativa de periodos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Fecha inicio</label>
+                <input type="date" class="form-control" value="2026-07-01">
+            </div>
+            <div class="filter-group">
+                <label>Fecha fin</label>
+                <input type="date" class="form-control" value="2026-07-07">
+            </div>
+            <div class="filter-group">
+                <label>Curso</label>
+                <select class="form-control">
+                    <option>Todos los cursos</option>
+                    <option>Programación </option>
+                    <option>Matemáticas </option>
+                    <option>Base de Datos</option>
+                    <option>Ciencias </option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Profesor</label>
+                <select class="form-control">
+                    <option>Todos los profesores</option>
+                    <option>Lucas Reyes</option>
+                    <option>Carolina Moreno</option>
+                    <option>Liza Molina</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Formato de salida</label>
+                <select class="form-control">
+                    <option>PDF</option>
+                    <option>Excel</option>
+                    <option>CSV</option>
+                    <option>Imagen</option>
+                </select>
+            </div>
+        </div>
+        <div class="mt-4 flex-between">
+            <button class="btn btn-primary">Generar reporte</button>
+            <button class="btn btn-outline">Restablecer filtros</button>
+        </div>
+    </div>
+
+    <div class="card mt-6">
+        <h3 class="card-title">Reportes generados recientemente</h3>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nombre del reporte</th>
+                        <th>Fecha creación</th>
+                        <th>Generado por</th>
+                        <th>Formato</th>
+                        <th>Tamaño</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Reporte mensual - Junio 2026</td>
+                        <td>01/07/2026 09:24</td>
+                        <td>Carlos Ramírez</td>
+                        <td>PDF</td>
+                        <td>2.4 MB</td>
+                        <td>
+                            <button class="btn-icon" title="Ver"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-icon" title="Descargar"><i class="fa-solid fa-download"></i></button>
+                            <button class="btn-icon" title="Eliminar"><i class="fa-solid fa-trash text-danger"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Asistencia ProgramaciónI - Semestre 1</td>
+                        <td>28/06/2026 15:12</td>
+                        <td>Carolina Moreno</td>
+                        <td>Excel</td>
+                        <td>1.8 MB</td>
+                        <td>
+                            <button class="btn-icon" title="Ver"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-icon" title="Descargar"><i class="fa-solid fa-download"></i></button>
+                            <button class="btn-icon" title="Eliminar"><i class="fa-solid fa-trash text-danger"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Estadísticas generales - 2026</td>
+                        <td>15/06/2026 11:45</td>
+                        <td>Lucas Reyes</td>
+                        <td>PDF</td>
+                        <td>3.1 MB</td>
+                        <td>
+                            <button class="btn-icon" title="Ver"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-icon" title="Descargar"><i class="fa-solid fa-download"></i></button>
+                            <button class="btn-icon" title="Eliminar"><i class="fa-solid fa-trash text-danger"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,148 @@
+<!-- =============================================================================
+     SISTEMA DE CONTROL DE ASISTENCIA BIOMÉTRICA (Asistec)
+     ARCHIVO: front/templates/index.html
+
+     PROPÓSITO:
+       Es la plantilla PRINCIPAL. Define la estructura base de toda la página
+       (sidebar, barra superior, área de contenido) e INCLUYE las 12 secciones
+       que viven en front/templates/ (inicio, dashboard, asistencia, reportes,
+       cursos, estudiantes, profesores, sesiones, usuarios, roles, historial,
+       configuracion).
+
+       Cada sección es un <section class="content-section">; el CSS las oculta
+       (display:none) y el JS (front/js/script.js) muestra solo la que tiene la
+       clase .active al navegar desde el sidebar.
+
+     CARPETA DE PLANTILLAS: Frontend  ->  front/
+       - templates/     -> páginas HTML (esta y las secciones incluidas)
+       - css/style.css  -> estilos
+       - js/script.js   -> lógica del frontend (cámara, navegación, gráficos)
+============================================================================= -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIOMETRIC- Sistema de Control de Asistencia</title>
+    <meta name="description" content="Sistema de control de asistencia biométrica con reconocimiento facial en tiempo real">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!--  Barra lateral de navegación -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-box">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                    <h1>Asistec</h1>
+                    <p>Control de Asistencia</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3>Panel Principal</h3>
+                    <ul>
+                        <li><a href="#inicio" class="nav-link active" data-section="inicio"><i class="fa-solid fa-home"></i> Inicio</a></li>
+                        <li><a href="#dashboard" class="nav-link" data-section="dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+                        <li><a href="#asistencia" class="nav-link" data-section="asistencia"><i class="fa-solid fa-video"></i> Asistencia en tiempo real</a></li>
+                        <li><a href="#reportes" class="nav-link" data-section="reportes"><i class="fa-solid fa-file-text"></i> Reportes</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Gestión Académica</h3>
+                    <ul>
+                        <li><a href="#cursos" class="nav-link" data-section="cursos"><i class="fa-solid fa-book"></i> Cursos</a></li>
+                        <li><a href="#estudiantes" class="nav-link" data-section="estudiantes"><i class="fa-solid fa-graduation-cap"></i> Estudiantes</a></li>
+                        <li><a href="#profesores" class="nav-link" data-section="profesores"><i class="fa-solid fa-chalkboard-user"></i> Profesores</a></li>
+                        <li><a href="#sesiones" class="nav-link" data-section="sesiones"><i class="fa-solid fa-calendar-check"></i> Sesiones</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Administración</h3>
+                    <ul>
+                        <li><a href="#usuarios" class="nav-link" data-section="usuarios"><i class="fa-solid fa-users-gear"></i> Usuarios</a></li>
+                        <li><a href="#roles" class="nav-link" data-section="roles"><i class="fa-solid fa-shield-halved"></i> Roles y permisos</a></li>
+                        <li><a href="#historial" class="nav-link" data-section="historial"><i class="fa-solid fa-clock-rotate-left"></i> Historial de cambios</a></li>
+                        <li><a href="#configuracion" class="nav-link" data-section="configuracion"><i class="fa-solid fa-cog"></i> Configuración</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-mini">
+                    <img src="https://picsum.photos/id/1005/200/200" alt="Usuario">
+                    <div>
+                        <p>{{ usuario.nombre if usuario else 'Usuario' }}</p>
+                        <span>{{ usuario.rol if usuario else 'Sin sesión' }}</span>
+                    </div>
+                    <a href="/logout" class="logout-link" title="Cerrar sesión">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!--  Contenido principal -->
+        <main class="main-content">
+            <header class="top-bar">
+                <button id="menu-toggle" class="menu-btn">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+                <nav class="breadcrumbs" id="breadcrumbs">
+                    <span>Inicio</span>
+                </nav>
+
+                <div class="top-bar-actions">
+                    <div class="search-box">
+                        <input type="text" id="buscadorGlobal" placeholder="Buscar en todo el sistema...">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <button class="icon-btn">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="badge">3</span>
+                    </button>
+                    <button class="icon-btn">
+                        <i class="fa-solid fa-circle-question"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="page-content">
+
+
+                <!-- AQUÍ SE INCLUYEN/CARGAN LAS VISTAS SEGÚN LA RUTA -->
+                {% include 'inicio.html' ignore missing %}
+                {% include 'dashboard.html' ignore missing %}
+                {% include 'asistencia.html' ignore missing %}
+                {% include 'reportes.html' ignore missing %}
+                {% include 'cursos.html' ignore missing %}
+                {% include 'estudiantes.html' ignore missing %}
+                {% include 'profesores.html' ignore missing %}
+                {% include 'sesiones.html' ignore missing %}
+                {% include 'usuarios.html' ignore missing %}
+                {% include 'roles.html' ignore missing %}
+                {% include 'historial.html' ignore missing %}
+                {% include 'configuracion.html' ignore missing %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Script principal: navegación entre secciones + control de cámara +
+         registro de asistencia + registro de rostros + gráficos (Chart.js). -->
+    <script src="/js/script.js"></script>
+    <!-- Script de gestión académica: carga las tablas de Estudiantes, Cursos,
+         Profesores y Sesiones desde las APIs y controla sus modales. -->
+    <script src="/js/gestion.js"></script>
+</body>
+</html>

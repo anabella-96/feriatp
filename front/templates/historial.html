@@ -1,0 +1,82 @@
+<!-- SECCIÓN: HISTORIAL DE CAMBIOS - bitácora de acciones (edición, creación, eliminación...). -->
+<section id="section-historial" class="content-section">
+    <h2 class="section-title">Historial de Cambios</h2>
+    <p class="section-subtitle">Registro de todas las acciones realizadas en el sistema</p>
+
+    <div class="card mt-6">
+        <div class="filters-inline mb-4">
+            <input type="date" class="form-control w-180">
+            <select class="form-control w-200">
+                <option>Todas las acciones</option>
+                <option>Creación</option>
+                <option>Edición</option>
+                <option>Eliminación</option>
+                <option>Inicio de sesión</option>
+            </select>
+            <select class="form-control w-200">
+                <option>Todos los usuarios</option>
+                <option>Carlos Ramírez</option>
+                <option>Luis Martínez</option>
+                <option>Ana Ruiz</option>
+            </select>
+            <button class="btn btn-outline">Filtrar</button>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table" id="tablaHistorial">
+                <thead>
+                    <tr>
+                        <th>Fecha y hora</th>
+                        <th>Usuario</th>
+                        <th>Acción realizada</th>
+                        <th>Módulo afectado</th>
+                        <th>Detalles</th>
+                        <th>Dirección IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>07/07/2026 08:22:15</td>
+                        <td>Carlos Ramírez</td>
+                        <td><span class="badge bg-success">Edición</span></td>
+                        <td>Usuarios</td>
+                        <td>Modificación de rol para usuario: sofiah</td>
+                        <td>192.168.1.45</td>
+                    </tr>
+                    <tr>
+                        <td>07/07/2026 08:10:02</td>
+                        <td>Carlos Ramírez</td>
+                        <td><span class="badge bg-info">Inicio sesión</span></td>
+                        <td>Acceso</td>
+                        <td>Ingreso exitoso al sistema</td>
+                        <td>192.168.1.45</td>
+                    </tr>
+                    <tr>
+                        <td>06/07/2026 16:20:44</td>
+                        <td>Ana Ruiz</td>
+                        <td><span class="badge bg-warning">Creación</span></td>
+                        <td>Sesiones</td>
+                        <td>Programada nueva sesión: Matemáticas II</td>
+                        <td>192.168.1.52</td>
+                    </tr>
+                    <tr>
+                        <td>06/07/2026 15:45:10</td>
+                        <td>Luis Martínez</td>
+                        <td><span class="badge bg-primary">Reporte</span></td>
+                        <td>Reportes</td>
+                        <td>Generado reporte de asistencia mensual</td>
+                        <td>192.168.1.38</td>
+                    </tr>
+                    <tr>
+                        <td>05/07/2026 11:30:05</td>
+                        <td>Carlos Ramírez</td>
+                        <td><span class="badge bg-danger">Eliminación</span></td>
+                        <td>Estudiantes</td>
+                        <td>Eliminado registro: ID 20231022</td>
+                        <td>192.168.1.45</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

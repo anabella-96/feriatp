@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "==3.0.0"
+werkzeug = "==3.0.0"
+tensorflow = "==2.15.0"
+tf-keras = "==2.15.0"
+deepface = "==0.0.86"
+pymysql = "==1.1.0"
+opencv-python = "==4.8.1.78"
+numpy = "==1.26.0"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"

@@ -1,0 +1,124 @@
+<!-- SECCIÓN: CONFIGURACIÓN DEL SISTEMA - ajustes generales y de reconocimiento facial (datos de ejemplo). -->
+<section id="section-configuracion" class="content-section">
+    <h2 class="section-title">Configuración del Sistema</h2>
+    <p class="section-subtitle">Ajustes generales, seguridad y preferencias de funcionamiento</p>
+
+    <div class="grid-layout mt-6">
+        <div class="col-main">
+            <div class="card">
+                <h3 class="card-title">Configuración General</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nombre de la institución</label>
+                        <input type="text" class="form-control" value="Instituto Tecnológico de Santiago">
+                    </div>
+                    <div class="form-group">
+                        <label>Año académico actual</label>
+                        <input type="text" class="form-control" value="2026">
+                    </div>
+                    <div class="form-group">
+                        <label>Semestre actual</label>
+                        <select class="form-control">
+                            <option value="1" selected>Primer Semestre</option>
+                            <option value="2">Segundo Semestre</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Zona horaria</label>
+                        <select class="form-control">
+                            <option selected>UTC-4 (Chile Continental)</option>
+                            <option>UTC-3</option>
+                            <option>UTC-5</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Porcentaje mínimo de asistencia aprobatoria</label>
+                        <input type="number" class="form-control" value="75" min="0" max="100">
+                        <p class="text-xs text-gray-500 mt-1">Porcentaje requerido para aprobar el curso</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-6">
+                <h3 class="card-title">Configuración de Reconocimiento Facial</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nivel de confianza mínimo</label>
+                        <input type="number" class="form-control" value="85" min="50" max="100">
+                        <p class="text-xs text-gray-500 mt-1">Porcentaje de coincidencia para registrar asistencia</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Tiempo de tolerancia de tardanza (minutos)</label>
+                        <input type="number" class="form-control" value="15" min="0" max="60">
+                    </div>
+                    <div class="form-group">
+                        <label>Activar verificación manual para coincidencias bajas</label>
+                        <div class="switch-control mt-2">
+                            <input type="checkbox" id="verificacionManual" checked>
+                            <label for="verificacionManual">Habilitar</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Guardar capturas de reconocimiento</label>
+                        <div class="switch-control mt-2">
+                            <input type="checkbox" id="guardarCapturas" checked>
+                            <label for="guardarCapturas">Habilitar</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-side">
+            <div class="card">
+                <h3 class="card-title">Seguridad</h3>
+                <div class="form-group mb-4">
+                    <label>Duración de sesión activa (minutos)</label>
+                    <input type="number" class="form-control" value="120" min="15" max="480">
+                </div>
+                <div class="form-group mb-4">
+                    <label>Requerir cambio de contraseña cada (días)</label>
+                    <input type="number" class="form-control" value="90" min="0" max="365">
+                </div>
+                <div class="form-group mb-4">
+                    <div class="switch-control">
+                        <input type="checkbox" id="autenticacion2fa" checked>
+                        <label for="autenticacion2fa">Autenticación de dos pasos</label>
+                    </div>
+                </div>
+                <div class="form-group mb-4">
+                    <div class="switch-control">
+                        <input type="checkbox" id="registroActividad" checked>
+                        <label for="registroActividad">Registrar todas las acciones en el historial</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-6">
+                <h3 class="card-title">Respaldo de Datos</h3>
+                <div class="form-group mb-4">
+                    <label>Frecuencia de respaldo automático</label>
+                    <select class="form-control">
+                        <option>Diario</option>
+                        <option selected>Semanal</option>
+                        <option>Mensual</option>
+                    </select>
+                </div>
+                <div class="form-group mb-4">
+                    <label>Almacenamiento de respaldos</label>
+                    <select class="form-control">
+                        <option selected>Servidor local</option>
+                        <option>Almacenamiento en la nube</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary w-full">Realizar respaldo ahora</button>
+                <button class="btn btn-outline w-full mt-2">Restaurar respaldo</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6 flex-end">
+        <button class="btn btn-outline mr-2">Restablecer valores por defecto</button>
+        <button class="btn btn-primary">Guardar toda la configuración</button>
+    </div>
+</section>
