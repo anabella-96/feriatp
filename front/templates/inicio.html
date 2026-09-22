@@ -1,13 +1,13 @@
 <!-- SECCIÓN: INICIO - resumen general (tarjetas de estadísticas y actividad reciente).
      Lleva la clase "active" por defecto: es la sección visible al abrir el sistema. -->
-<section id="section-inicio" class="content-section active">
-    <h2 class="section-title">Bienvenido al Sistema Biometric</h2>
+<section id="section-inicio" class="content-section active" aria-labelledby="titulo-inicio">
+    <h2 id="titulo-inicio" class="section-title">Bienvenido al Sistema Biometric</h2>
     <p class="section-subtitle">Resumen general del control de asistencia y gestión académica</p>
 
-    <div class="stats-row">
+    <div class="stats-row" role="region" aria-label="Estadísticas generales">
         <div class="stat-card">
             <div class="stat-icon bg-blue">
-                <i class="fa-solid fa-users"></i>
+                <i class="fa-solid fa-users" aria-hidden="true"></i>
             </div>
             <div>
                 <h3>1.248</h3>
@@ -16,7 +16,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-icon bg-green">
-                <i class="fa-solid fa-chalkboard-user"></i>
+                <i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i>
             </div>
             <div>
                 <h3>86</h3>
@@ -25,7 +25,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-icon bg-purple">
-                <i class="fa-solid fa-book"></i>
+                <i class="fa-solid fa-book" aria-hidden="true"></i>
             </div>
             <div>
                 <h3>124</h3>
@@ -34,7 +34,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-icon bg-orange">
-                <i class="fa-solid fa-calendar-check"></i>
+                <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
             </div>
             <div>
                 <h3>89.2%</h3>
@@ -49,35 +49,35 @@
                 <h3 class="card-title">Actividad reciente</h3>
                 <ul class="activity-list">
                     <li>
-                        <i class="fa-solid fa-check-circle text-success"></i>
+                        <i class="fa-solid fa-check-circle text-success" aria-hidden="true"></i>
                         <div>
                             <p>Asistencia registrada: Fernando Ojeda - Programación I</p>
                             <span>Hoy, 10:15 AM</span>
                         </div>
                     </li>
                     <li>
-                        <i class="fa-solid fa-user-plus text-primary"></i>
+                        <i class="fa-solid fa-user-plus text-primary" aria-hidden="true"></i>
                         <div>
                             <p>Nuevo estudiante agregado: Antonella Lobos</p>
                             <span>Ayer, 03:45 PM</span>
                         </div>
                     </li>
                     <li>
-                        <i class="fa-solid fa-video text-warning"></i>
+                        <i class="fa-solid fa-video text-warning" aria-hidden="true"></i>
                         <div>
                             <p>Sesión iniciada: Matemáticas - Grupo B</p>
                             <span>Ayer, 08:00 AM</span>
                         </div>
                     </li>
                     <li>
-                        <i class="fa-solid fa-file-export text-purple"></i>
+                        <i class="fa-solid fa-file-export text-purple"  aria-hidden="true" ></i>
                         <div>
                             <p>Reporte mensual generado correctamente</p>
                             <span>05/07/2026</span>
                         </div>
                     </li>
                     <li>
-                        <i class="fa-solid fa-user-shield text-gray-500"></i>
+                        <i class="fa-solid fa-user-shield text-gray-500" aria-hidden="true"></i>
                         <div>
                             <p>Cambio de rol: Usuario Ana Ruiz → Profesor</p>
                             <span>04/07/2026</span>

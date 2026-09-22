@@ -2,123 +2,270 @@
 <section id="section-configuracion" class="content-section">
     <h2 class="section-title">Configuración del Sistema</h2>
     <p class="section-subtitle">Ajustes generales, seguridad y preferencias de funcionamiento</p>
-
-    <div class="grid-layout mt-6">
-        <div class="col-main">
-            <div class="card">
-                <h3 class="card-title">Configuración General</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Nombre de la institución</label>
-                        <input type="text" class="form-control" value="Instituto Tecnológico de Santiago">
-                    </div>
-                    <div class="form-group">
-                        <label>Año académico actual</label>
-                        <input type="text" class="form-control" value="2026">
-                    </div>
-                    <div class="form-group">
-                        <label>Semestre actual</label>
-                        <select class="form-control">
-                            <option value="1" selected>Primer Semestre</option>
-                            <option value="2">Segundo Semestre</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Zona horaria</label>
-                        <select class="form-control">
-                            <option selected>UTC-4 (Chile Continental)</option>
-                            <option>UTC-3</option>
-                            <option>UTC-5</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Porcentaje mínimo de asistencia aprobatoria</label>
-                        <input type="number" class="form-control" value="75" min="0" max="100">
-                        <p class="text-xs text-gray-500 mt-1">Porcentaje requerido para aprobar el curso</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card mt-6">
-                <h3 class="card-title">Configuración de Reconocimiento Facial</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Nivel de confianza mínimo</label>
-                        <input type="number" class="form-control" value="85" min="50" max="100">
-                        <p class="text-xs text-gray-500 mt-1">Porcentaje de coincidencia para registrar asistencia</p>
-                    </div>
-                    <div class="form-group">
-                        <label>Tiempo de tolerancia de tardanza (minutos)</label>
-                        <input type="number" class="form-control" value="15" min="0" max="60">
-                    </div>
-                    <div class="form-group">
-                        <label>Activar verificación manual para coincidencias bajas</label>
-                        <div class="switch-control mt-2">
-                            <input type="checkbox" id="verificacionManual" checked>
-                            <label for="verificacionManual">Habilitar</label>
+    <form id="formConfiguracion">
+        <div class="grid-layout mt-6">
+            <div class="col-main">
+                <div class="card">
+                    <h3 class="card-title">Configuración General</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre de la institución</label>
+                            <input type="text" class="form-control" id="conf_institucion" value="Instituto Tecnológico de Santiago">
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Guardar capturas de reconocimiento</label>
-                        <div class="switch-control mt-2">
-                            <input type="checkbox" id="guardarCapturas" checked>
-                            <label for="guardarCapturas">Habilitar</label>
+                        <div class="form-group">
+                            <label>Año académico actual</label>
+                            <input type="text" class="form-control" id="conf_anio" value="2026">
+                        </div>
+                        <div class="form-group">
+                            <label>Semestre actual</label>
+                            <select class="form-control" id="conf_semestre">
+                                <option value="1">Primer Semestre</option>
+                                <option value="2">Segundo Semestre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Zona horaria</label>
+                            <select class="form-control" id="conf_zona">
+                                <option>UTC-4 (Chile Continental)</option>
+                                <option>UTC-3</option>
+                                <option>UTC-5</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Porcentaje mínimo de asistencia aprobatoria</label>
+                            <input type="number" class="form-control" id="conf_asistencia" value="75" min="0" max="100">
+                            <p class="text-xs text-gray-500 mt-1">Porcentaje requerido para aprobar el curso</p>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="col-side">
-            <div class="card">
-                <h3 class="card-title">Seguridad</h3>
-                <div class="form-group mb-4">
-                    <label>Duración de sesión activa (minutos)</label>
-                    <input type="number" class="form-control" value="120" min="15" max="480">
-                </div>
-                <div class="form-group mb-4">
-                    <label>Requerir cambio de contraseña cada (días)</label>
-                    <input type="number" class="form-control" value="90" min="0" max="365">
-                </div>
-                <div class="form-group mb-4">
-                    <div class="switch-control">
-                        <input type="checkbox" id="autenticacion2fa" checked>
-                        <label for="autenticacion2fa">Autenticación de dos pasos</label>
+                <div class="card mt-6">
+                    <h3 class="card-title">Configuración de Reconocimiento Facial</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nivel de confianza mínimo</label>
+                            <input type="number" class="form-control" id="conf_confianza" value="85" min="50" max="100">
+                            <p class="text-xs text-gray-500 mt-1">Porcentaje de coincidencia para registrar asistencia</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Tiempo de tolerancia de tardanza (minutos)</label>
+                            <input type="number" class="form-control" id="conf_tolerancia" value="15" min="0" max="60">
+                        </div>
+                        <div class="form-group">
+                            <label>Activar verificación manual para coincidencias bajas</label>
+                            <div class="switch-control mt-2">
+                                <input type="checkbox" id="verificacionManual">
+                                <label for="verificacionManual">Habilitar</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Guardar capturas de reconocimiento</label>
+                            <div class="switch-control mt-2">
+                                <input type="checkbox" id="guardarCapturas">
+                                <label for="guardarCapturas">Habilitar</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="form-group mb-4">
-                    <div class="switch-control">
-                        <input type="checkbox" id="registroActividad" checked>
-                        <label for="registroActividad">Registrar todas las acciones en el historial</label>
+            </div>
+            <div class="col-side">
+                <div class="card">
+                    <h3 class="card-title">Seguridad</h3>
+                    <div class="form-group mb-4">
+                        <label>Duración de sesión activa (minutos)</label>
+                        <input type="number" class="form-control" id="conf_sesion" value="120" min="15" max="480">
+                    </div>
+                    <div class="form-group mb-4">
+                        <label>Requerir cambio de contraseña cada (días)</label>
+                        <input type="number" class="form-control" id="conf_clave" value="90" min="0" max="365">
+                    </div>
+                    <div class="form-group mb-4">
+                        <div class="switch-control">
+                            <input type="checkbox" id="autenticacion2fa">
+                            <label for="autenticacion2fa">Autenticación de dos pasos</label>
+                        </div>
+                    </div>
+                    <div class="form-group mb-4">
+                        <div class="switch-control">
+                            <input type="checkbox" id="registroActividad">
+                            <label for="registroActividad">Registrar todas las acciones en el historial</label>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="card mt-6">
-                <h3 class="card-title">Respaldo de Datos</h3>
-                <div class="form-group mb-4">
-                    <label>Frecuencia de respaldo automático</label>
-                    <select class="form-control">
-                        <option>Diario</option>
-                        <option selected>Semanal</option>
-                        <option>Mensual</option>
-                    </select>
+                <div class="card mt-6">
+                    <h3 class="card-title">Respaldo de Datos</h3>
+                    <div class="form-group mb-4">
+                        <label>Frecuencia de respaldo automático</label>
+                        <select class="form-control" id="conf_respaldo">
+                            <option>Diario</option>
+                            <option>Semanal</option>
+                            <option>Mensual</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label>Almacenamiento de respaldos</label>
+                        <select class="form-control" id="conf_almacen">
+                            <option>Servidor local</option>
+                            <option>Almacenamiento en la nube</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-primary w-full" id="btnRespaldo">Realizar respaldo ahora</button>
+                    <button type="button" class="btn btn-outline w-full mt-2" id="btnRestaurar">Restaurar respaldo</button>
                 </div>
-                <div class="form-group mb-4">
-                    <label>Almacenamiento de respaldos</label>
-                    <select class="form-control">
-                        <option selected>Servidor local</option>
-                        <option>Almacenamiento en la nube</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary w-full">Realizar respaldo ahora</button>
-                <button class="btn btn-outline w-full mt-2">Restaurar respaldo</button>
             </div>
         </div>
-    </div>
-
-    <div class="mt-6 flex-end">
-        <button class="btn btn-outline mr-2">Restablecer valores por defecto</button>
-        <button class="btn btn-primary">Guardar toda la configuración</button>
-    </div>
+        <div class="mt-6 flex-end">
+            <button type="button" class="btn btn-outline mr-2" id="btnRestablecer">Restablecer valores por defecto</button>
+            <button type="submit" class="btn btn-primary">Guardar toda la configuración</button>
+        </div>
+    </form>
 </section>
+
+<!-- LÓGICA JAVASCRIPT - Configuración del Sistema -->
+<script>
+// Valores por defecto
+const valoresPorDefecto = {
+    institucion: "Instituto Tecnológico de Santiago",
+    anio: "2026",
+    semestre: "1",
+    zona: "UTC-4 (Chile Continental)",
+    asistencia: 75,
+    confianza: 85,
+    tolerancia: 15,
+    verificacionManual: true,
+    guardarCapturas: true,
+    sesion: 120,
+    clave: 90,
+    autenticacion2fa: true,
+    registroActividad: true,
+    respaldo: "Semanal",
+    almacen: "Servidor local"
+};
+
+// Cargar configuración guardada o usar valores por defecto
+let configuracion = JSON.parse(localStorage.getItem('configuracionSistema')) || valoresPorDefecto;
+
+// Elementos del DOM
+const form = document.getElementById('formConfiguracion');
+
+// Iniciar
+document.addEventListener('DOMContentLoaded', () => {
+    cargarConfiguracionEnFormulario();
+    asignarEventos();
+});
+
+// Cargar valores guardados en los campos del formulario
+function cargarConfiguracionEnFormulario() {
+    document.getElementById('conf_institucion').value = configuracion.institucion;
+    document.getElementById('conf_anio').value = configuracion.anio;
+    document.getElementById('conf_semestre').value = configuracion.semestre;
+    document.getElementById('conf_zona').value = configuracion.zona;
+    document.getElementById('conf_asistencia').value = configuracion.asistencia;
+    document.getElementById('conf_confianza').value = configuracion.confianza;
+    document.getElementById('conf_tolerancia').value = configuracion.tolerancia;
+    document.getElementById('verificacionManual').checked = configuracion.verificacionManual;
+    document.getElementById('guardarCapturas').checked = configuracion.guardarCapturas;
+    document.getElementById('conf_sesion').value = configuracion.sesion;
+    document.getElementById('conf_clave').value = configuracion.clave;
+    document.getElementById('autenticacion2fa').checked = configuracion.autenticacion2fa;
+    document.getElementById('registroActividad').checked = configuracion.registroActividad;
+    document.getElementById('conf_respaldo').value = configuracion.respaldo;
+    document.getElementById('conf_almacen').value = configuracion.almacen;
+}
+
+// Guardar configuración desde el formulario
+function guardarConfiguracion(e) {
+    e.preventDefault();
+
+    configuracion = {
+        institucion: document.getElementById('conf_institucion').value.trim(),
+        anio: document.getElementById('conf_anio').value.trim(),
+        semestre: document.getElementById('conf_semestre').value,
+        zona: document.getElementById('conf_zona').value,
+        asistencia: parseInt(document.getElementById('conf_asistencia').value) || 75,
+        confianza: parseInt(document.getElementById('conf_confianza').value) || 85,
+        tolerancia: parseInt(document.getElementById('conf_tolerancia').value) || 15,
+        verificacionManual: document.getElementById('verificacionManual').checked,
+        guardarCapturas: document.getElementById('guardarCapturas').checked,
+        sesion: parseInt(document.getElementById('conf_sesion').value) || 120,
+        clave: parseInt(document.getElementById('conf_clave').value) || 90,
+        autenticacion2fa: document.getElementById('autenticacion2fa').checked,
+        registroActividad: document.getElementById('registroActividad').checked,
+        respaldo: document.getElementById('conf_respaldo').value,
+        almacen: document.getElementById('conf_almacen').value
+    };
+
+    localStorage.setItem('configuracionSistema', JSON.stringify(configuracion));
+
+    // Registrar en el historial (si la función existe)
+    if (typeof agregarAlHistorial === 'function') {
+        agregarAlHistorial('Edición', 'Configuración', 'Se actualizó la configuración del sistema');
+    }
+
+    alert('✅ Configuración guardada correctamente');
+}
+
+// Restablecer a valores por defecto
+function restablecerPorDefecto() {
+    if (confirm('⚠️ ¿Restablecer TODA la configuración a sus valores por defecto?\nSe perderán todos los cambios personalizados.')) {
+        configuracion = { ...valoresPorDefecto };
+        localStorage.setItem('configuracionSistema', JSON.stringify(configuracion));
+        cargarConfiguracionEnFormulario();
+
+        if (typeof agregarAlHistorial === 'function') {
+            agregarAlHistorial('Edición', 'Configuración', 'Se restablecieron valores por defecto');
+        }
+
+        alert('✅ Configuración restablecida');
+    }
+}
+
+// Simular respaldo
+function realizarRespaldo() {
+    const datosCompletos = {
+        configuracion: configuracion,
+        usuarios: JSON.parse(localStorage.getItem('usuarios')) || [],
+        permisos: JSON.parse(localStorage.getItem('permisosRoles')) || {},
+        historial: JSON.parse(localStorage.getItem('historialCambios')) || []
+    };
+
+    localStorage.setItem('respaldoDatos', JSON.stringify(datosCompletos));
+
+    if (typeof agregarAlHistorial === 'function') {
+        agregarAlHistorial('Creación', 'Respaldo', 'Se generó respaldo manual de todos los datos');
+    }
+
+    alert('✅ Respaldo realizado correctamente\nTodos los datos han sido guardados');
+}
+
+// Restaurar respaldo
+function restaurarRespaldo() {
+    const respaldo = localStorage.getItem('respaldoDatos');
+    if (!respaldo) {
+        alert('⚠️ No se encontró ningún respaldo guardado');
+        return;
+    }
+
+    if (confirm('¿Deseas restaurar los datos desde el último respaldo?\nSe sobrescribirá la información actual.')) {
+        const datos = JSON.parse(respaldo);
+        if (datos.configuracion) {
+            configuracion = datos.configuracion;
+            localStorage.setItem('configuracionSistema', JSON.stringify(configuracion));
+            cargarConfiguracionEnFormulario();
+        }
+
+        if (typeof agregarAlHistorial === 'function') {
+            agregarAlHistorial('Edición', 'Respaldo', 'Restauración de datos desde respaldo');
+        }
+
+        alert('✅ Datos restaurados correctamente');
+    }
+}
+
+// Asignar eventos
+function asignarEventos() {
+    form.addEventListener('submit', guardarConfiguracion);
+    document.getElementById('btnRestablecer').addEventListener('click', restablecerPorDefecto);
+    document.getElementById('btnRespaldo').addEventListener('click', realizarRespaldo);
+    document.getElementById('btnRestaurar').addEventListener('click', restaurarRespaldo);
+}
+</script>

@@ -34,6 +34,59 @@ const placeholderCamara = document.getElementById("camera-placeholder"); // mens
 // para poder detenerlo con apagarCamara() cuando sea necesario.
 let camaraStream = null;
 
+// --- Selección de cámara (interna / externa) ---
+// cameraActual   -> deviceId de la cámara que está en uso (null = automática)
+// cameraDispositivos -> lista de cámaras detectadas {deviceId, label}
+let cameraActual = null;
+let cameraDispositivos = [];
+
+// Devuelve un nombre amigable para una cámara. Mientras no se haya dado
+// permiso, el navegador oculta las etiquetas, así que usamos "Interna"/"Externa"
+// según la posición en la lista (por lo general la 1ª es interna y la 2ª externa).
+function nombreCamara(dispositivo, indice) {
+    const etiqueta = (dispositivo.label || "").trim();
+    if (etiqueta) return etiqueta;
+    if (indice === 0) return "Cámara interna";
+    if (indice === 1) return "Cámara externa (USB)";
+    return "Cámara " + (indice + 1);
+}
+
+// Enumera todas las cámaras del dispositivo y las muestra en el selector.
+function cargarCamaras() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+    const select = document.getElementById("camera-select");
+    navigator.mediaDevices.enumerateDevices()
+        .then(dispositivos => {
+            cameraDispositivos = dispositivos.filter(d => d.kind === "videoinput");
+            if (!select) return;
+
+            // Recordar la selección actual antes de reconstruir las opciones.
+            const previa = select.value;
+
+            select.innerHTML = "";
+            // Opción "Automática": el sistema usa la cámara por defecto.
+            const opcionAuto = document.createElement("option");
+            opcionAuto.value = "auto";
+            opcionAuto.textContent = "📷 Cámara automática";
+            select.appendChild(opcionAuto);
+
+            cameraDispositivos.forEach((dispositivo, indice) => {
+                const opcion = document.createElement("option");
+                opcion.value = dispositivo.deviceId;
+                opcion.textContent = nombreCamara(dispositivo, indice);
+                select.appendChild(opcion);
+            });
+
+            // Restaurar la selección anterior (o la cámara que está activa).
+            if (previa && Array.from(select.options).some(o => o.value === previa)) {
+                select.value = previa;
+            } else if (cameraActual && cameraActual !== "auto") {
+                select.value = cameraActual;
+            }
+        })
+        .catch(err => console.warn("No se pudieron listar las cámaras:", err));
+}
+
 // -----------------------------------------------------------------------------
 // 2) FUNCIÓN AUXILIAR: mostrar mensajes de la cámara en la interfaz
 // -----------------------------------------------------------------------------
@@ -63,25 +116,73 @@ function mostrarMensaje(texto, tipo) {
 // 3) ENCENDER LA CÁMARA
 //    Pide permiso al navegador (navigator.mediaDevices.getUserMedia),
 //    asigna el stream al <video> y oculta el placeholder gris.
+//    Acepta la "deviceId" de la cámara que se quiere usar (interna, externa, etc.).
+//    Si no se pasa nada, usa la cámara por defecto del dispositivo.
 // -----------------------------------------------------------------------------
-function encenderCamara() {
+function encenderCamara(deviceId) {
     if (!video) {
         console.error("No se encontró el elemento <video> en el HTML.");
         return;
     }
 
+    // La API de cámara SOLO existe en "contexto seguro" (HTTPS o localhost).
+    // Si por cualquier motivo se abrió con http:// + IP (desde otro dispositivo
+    // de la red) nos redirigimos solos a https://IP:5001, donde sí funciona,
+    // en lugar de mostrar un error.
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        const host = window.location.hostname;
+        const enLocal = (host === "localhost" || host === "127.0.0.1");
+
+        if (window.location.protocol !== "https:" && !enLocal) {
+            const aviso = "Conectando a la ruta segura (https) para poder usar la cámara...";
+            console.warn(aviso);
+            mostrarMensaje("ℹ️ " + aviso, "info");
+            window.location.replace("https://" + host + ":5001" + window.location.pathname);
+            return;
+        }
+
+        const aviso = "Tu navegador no permite la cámara aquí. Abre el sistema con https://IP:5001 (o desde localhost).";
+        console.error(aviso);
+        mostrarMensaje("⚠️ " + aviso, "error");
+        if (placeholderCamara) placeholderCamara.style.display = "flex";
+        return;
+    }
+
+    // Si ya hay una cámara activa y se pidió OTRA distinta, detener la anterior
+    // para liberar el dispositivo antes de solicitar el nuevo.
+    if (camaraStream) {
+        camaraStream.getTracks().forEach(track => track.stop());
+        camaraStream = null;
+        video.srcObject = null;
+        // Dejar visible el placeholder mientras se inicia la nueva cámara.
+        if (placeholderCamara) placeholderCamara.style.display = "flex";
+    }
+
     mostrarMensaje("Iniciando cámara...", "info");
 
+    // Restricciones del video: alta resolución y orientación "environment"
+    // para que en móviles use preferentemente la cámara trasera por defecto.
+    const restriccionesVideo = {
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        facingMode: "environment",
+    };
+
+    // Si el usuario eligió una cámara concreta, forzamos su deviceId exacto.
+    if (deviceId && deviceId !== "auto") {
+        restriccionesVideo.deviceId = { exact: deviceId };
+        delete restriccionesVideo.facingMode;
+    }
+
     // getUserMedia devuelve una "promesa". Si el usuario acepta, stream.
-    navigator.mediaDevices.getUserMedia({
-        video: {
-            width: { ideal: 400 },
-            height: { ideal: 300 },
-        },
-    })
+    navigator.mediaDevices.getUserMedia({ video: restriccionesVideo })
     .then(stream => {
         camaraStream = stream;          // Guardamos el flujo para poder detenerlo.
+        cameraActual = (deviceId && deviceId !== "auto") ? deviceId : "auto";
         video.srcObject = stream;       // Conectamos el stream al <video>.
+
+        // Al tener permiso, re-enumerar las cámaras para mostrar sus nombres reales.
+        cargarCamaras();
 
         // Esperamos a que el video cargue los metadatos y luego lo reproducimos.
         video.onloadedmetadata = () => {
@@ -125,6 +226,7 @@ function apagarCamara() {
         camaraStream.getTracks().forEach(track => track.stop());
         camaraStream = null;
     }
+    cameraActual = null;
     if (video) {
         video.srcObject = null;
     }
@@ -161,9 +263,9 @@ function capturar() {
         return;
     }
 
-    // Copiar el frame actual del video al canvas (resolución 400x300).
+    // Copiar el frame actual del video al canvas (mismo tamaño del canvas).
     const contexto = canvas.getContext("2d");
-    contexto.drawImage(video, 0, 0, 400, 300);
+    contexto.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     // Convertir el canvas a una imagen JPEG en base64 (data URL).
     const imagenBase64 = canvas.toDataURL("image/jpeg");
@@ -208,9 +310,13 @@ function capturar() {
 
 // -----------------------------------------------------------------------------
 // 6) REGISTRAR UN NUEVO ROSTRO
-//    Toma un frame del video + el ID del alumno, los envía a POST /registrar_rostro.
-//    El servidor verifica que haya una cara y guarda la foto en
+//    Toma un frame del video + el alumno elegido automáticamente, los envía a
+//    POST /registrar_rostro. El servidor verifica que haya una cara, rechaza a
+//    personas ya registradas y guarda la foto en
 //    back/imagenes_conocidas/{alumno_id}.jpg (dejándola lista para reconocer).
+//
+//    La matrícula NUNCA se digita a mano: sale del selector de alumnos sin
+//    rostro (GET /api/estudiantes/sin_rostro), evitando IDs equivocados.
 // -----------------------------------------------------------------------------
 
 // Ayudante para mostrar mensajes en la tarjeta "Registrar nuevo rostro".
@@ -232,6 +338,109 @@ function mostrarResultadoRegistro(texto, tipo) {
     contenedor.textContent = texto;
 }
 
+// Carga en el selector de "Registrar nuevo rostro" los estudiantes que AÚN no
+// tienen foto (GET /api/estudiantes/sin_rostro). La matrícula (value de cada
+// opción) se elige automáticamente; nunca se escribe a mano.
+// 'seleccionarId' (opcional): matrícula a preseleccionar (ej. el alumno recién
+// creado en el módulo Estudiantes).
+//
+// Para que el ID nunca se pierda (aunque la página se recargue, por ejemplo
+// tras la redirección a HTTPS de la cámara o al presionar F5), el alumno
+// pendiente se recuerda en sessionStorage y como parámetro "?rostro=" en la URL.
+function obtenerAlumnoPendiente(seleccionarId) {
+    if (seleccionarId) return String(seleccionarId);
+    const deUrl = new URLSearchParams(window.location.search).get('rostro');
+    if (deUrl) return deUrl;
+    try { return sessionStorage.getItem('await_rostro') || ''; } catch (e) { return ''; }
+}
+
+function mostrarAvisoRegistro(texto) {
+    const aviso = document.getElementById('alumno-registrar-aviso');
+    if (!aviso) return;
+    aviso.style.display = 'block';
+    aviso.textContent = texto;
+}
+
+// Consume el ID pendiente solo cuando ya se confirmó (estaba en el selector).
+function limpiarAlumnoPendiente() {
+    try { sessionStorage.removeItem('await_rostro'); } catch (e) { /* sin storage */ }
+    if (new URLSearchParams(window.location.search).has('rostro')) {
+        const url = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, '', url);
+    }
+}
+async function cargarAlumnosSinRostro(seleccionarId) {
+    const select = document.getElementById('select-alumno-registrar');
+    if (!select) return;
+
+    // Completar el ID pedido con recuerdos de sesión (URL ?rostro= / storage).
+    const pendiente = obtenerAlumnoPendiente(seleccionarId);
+
+    try {
+        const respuesta = await fetch('/api/estudiantes/sin_rostro');
+        const datos = await respuesta.json();
+
+        select.innerHTML = '';
+        if (!datos.ok || !Array.isArray(datos.datos) || datos.datos.length === 0) {
+            select.innerHTML = '<option value="">No hay alumnos pendientes de rostro</option>';
+            if (pendiente) {
+                mostrarResultadoRegistro(
+                    "⚠️ La matrícula " + pendiente + " ya tiene un rostro registrado o no existe.",
+                    "warning"
+                );
+            }
+            return;
+        }
+
+        datos.datos.forEach(alumno => {
+            const opcion = document.createElement('option');
+            opcion.value = alumno.id;
+            opcion.textContent = `${alumno.id} — ${alumno.nombre} ${alumno.apellido || ''}`;
+            select.appendChild(opcion);
+        });
+
+        // Preseleccionar la matrícula pedida (la del alumno recién creado).
+        // El resto usa la primera opción, que queda seleccionada por defecto.
+        let preseleccionado = '';
+        if (pendiente && Array.from(select.options).some(o => String(o.value) === String(pendiente))) {
+            select.value = String(pendiente);
+            preseleccionado = String(pendiente);
+        }
+
+        // Mostrar SIEMPRE qué matrícula quedó ingresada en el selector, para
+        // que el número autogenerado en Estudiantes sea visible aquí abajo.
+        const opcionActiva = Array.from(select.options).find(o => o.value === select.value);
+        if (opcionActiva && opcionActiva.value) {
+            const esPendiente = String(opcionActiva.value) === preseleccionado;
+            mostrarAvisoRegistro(
+                "📌 Matrícula a registrar: " + opcionActiva.value +
+                (esPendiente ? " (auto-seleccionada desde Estudiantes)" : "")
+            );
+        }
+
+        if (pendiente && !preseleccionado) {
+            // El ID pedido no apareció en la lista (ya tiene rostro o no existe).
+            // Se olvida para no arrastrar avisos obsoletos en futuras cargas.
+            limpiarAlumnoPendiente();
+            mostrarResultadoRegistro(
+                "⚠️ La matrícula " + pendiente +
+                " no está en la lista de alumnos sin rostro. Si acabas de crearla, verifica que no tenga una foto ya guardada.",
+                "warning"
+            );
+            mostrarAvisoRegistro("Cayó a la primera opción: " + (opcionActiva ? opcionActiva.value : '—'));
+        }
+
+        // Si el ID pendiente se confirmó en el selector, olvidarlo para que un
+        // futuro "Registrar rostro" no fuerce una matrícula vieja.
+        if (preseleccionado) limpiarAlumnoPendiente();
+    } catch (e) {
+        select.innerHTML = '<option value="">No se pudieron cargar los alumnos</option>';
+        if (pendiente) {
+            mostrarResultadoRegistro("Error al cargar los alumnos sin rostro: " + e.message, "error");
+        }
+    }
+}
+
 function registrarRostro() {
     if (!video || !canvas) {
         console.error("Los elementos de video o canvas no están definidos en el HTML.");
@@ -244,19 +453,23 @@ function registrarRostro() {
         return;
     }
 
-    // Leer el ID del alumno escrito en el input de la tarjeta.
-    const inputAlumno = document.getElementById("input-alumno-registrar");
-    const alumnoId = inputAlumno ? inputAlumno.value.trim() : "";
-
-    // Validar que sea un número (el ID será el nombre del archivo de foto).
-    if (!alumnoId || !/^\d+$/.test(alumnoId)) {
-        mostrarResultadoRegistro("⚠️ Ingresa el ID del alumno (solo números).", "warning");
+    // La matrícula sale del selector (nunca se digita). Sin alumno, no hay nada.
+    const selectAlumno = document.getElementById("select-alumno-registrar");
+    let alumnoId = selectAlumno ? selectAlumno.value.trim() : "";
+    if (!alumnoId) {
+        // Puede ser que aún esté cargando la lista o que no haya pendientes:
+        // recargamos y damos un mensaje claro para reintentar.
+        cargarAlumnosSinRostro();
+        mostrarResultadoRegistro(
+            "⚠️ No hay un alumno seleccionado todavía. Espera a que cargue la lista de alumnos sin rostro (o crea un estudiante en el módulo Estudiantes) y vuelve a presionar el botón.",
+            "warning"
+        );
         return;
     }
 
     // Copiar el frame actual del video al canvas y convertirlo a base64.
     const contexto = canvas.getContext("2d");
-    contexto.drawImage(video, 0, 0, 400, 300);
+    contexto.drawImage(video, 0, 0, canvas.width, canvas.height);
     const imagenBase64 = canvas.toDataURL("image/jpeg");
 
     mostrarResultadoRegistro("Procesando y guardando rostro...", "info");
@@ -270,12 +483,18 @@ function registrarRostro() {
     .then(respuesta => respuesta.json())
     .then(datos => {
         if (!datos.ok) {
+            // Persona ya registrada: se informa como advertencia (con su matrícula).
+            if (datos.ya_registrado) {
+                mostrarResultadoRegistro("⚠️ " + datos.mensaje, "warning");
+                return;
+            }
             mostrarResultadoRegistro("❌ " + datos.mensaje, "error");
             return;
         }
-        // Éxito: el rostro quedó registrado.
+        // Éxito: el rostro quedó registrado. Quitamos al alumno del selector
+        // (recargando la lista) y quedamos listos para el siguiente.
         mostrarResultadoRegistro("✅ " + datos.mensaje, "success");
-        if (inputAlumno) inputAlumno.value = ""; // Limpiar el input para el siguiente.
+        cargarAlumnosSinRostro();
     })
     .catch(err => {
         mostrarResultadoRegistro("Error de red: " + err, "error");
@@ -319,8 +538,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // En pantallas pequeñas, cerrar el sidebar tras navegar.
             if (window.innerWidth < 1024) {
-                const sidebar = document.getElementById('sidebar');
-                if (sidebar) sidebar.classList.remove('open');
+                const sidebarMob = document.getElementById('sidebar');
+                if (sidebarMob) sidebarMob.classList.remove('open');
+                const backdropMob = document.getElementById('sidebar-backdrop');
+                if (backdropMob) backdropMob.classList.remove('show');
             }
         });
     });
@@ -328,9 +549,48 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 7.2 Botón de menú lateral (versiones móviles / tablet) ---
     const menuToggle = document.getElementById('menu-toggle');
     const sidebar = document.getElementById('sidebar');
+    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
     if (menuToggle && sidebar) {
         menuToggle.addEventListener('click', () => {
             sidebar.classList.toggle('open');
+            if (sidebarBackdrop) sidebarBackdrop.classList.toggle('show');
+        });
+    }
+    // Cerrar el menú lateral al tocar la capa oscura de fondo (móvil/tablet).
+    if (sidebarBackdrop) {
+        sidebarBackdrop.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarBackdrop.classList.remove('show');
+        });
+    }
+
+    // --- 7.2b Listar las cámaras disponibles y llenar el selector ---
+    cargarCamaras();
+    // --- 7.2c Cargar alumnos sin rostro para registrar con ID automático ---
+    cargarAlumnosSinRostro();
+    const selectAlumnoRegistrar = document.getElementById('select-alumno-registrar');
+    if (selectAlumnoRegistrar) {
+        // Si el usuario elige OTR@ alumno/a a mano, actualizar el aviso visible.
+        selectAlumnoRegistrar.addEventListener('change', function () {
+            const opcion = this.options[this.selectedIndex];
+            if (opcion && opcion.value) {
+                mostrarAvisoRegistro("📌 Matrícula a registrar: " + opcion.value);
+            } else {
+                mostrarAvisoRegistro('');
+                const aviso = document.getElementById('alumno-registrar-aviso');
+                if (aviso) aviso.style.display = 'none';
+            }
+        });
+    }
+    const selectCamara = document.getElementById('camera-select');
+    if (selectCamara) {
+        selectCamara.addEventListener('change', function () {
+            // Si la cámara está encendida, reiniciarla con el dispositivo elegido.
+            if (camaraStream) {
+                encenderCamara(this.value);
+            } else {
+                cameraActual = this.value === 'auto' ? null : this.value;
+            }
         });
     }
 
@@ -435,6 +695,7 @@ document.addEventListener('click', function(e) {
         // Iniciar la cámara (dos botones posibles: principal y controles laterales).
         if (id === 'btn-iniciar-camara' || texto.includes("iniciar cámara") || texto.includes("iniciar sesion / camara")) {
             encenderCamara();
+            
         }
         // Pausar/detener la cámara.
         else if (id === 'btn-detener-camara' || texto.includes("pausar reconocimiento") || texto.includes("apagar cámara")) {

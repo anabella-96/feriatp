@@ -11,9 +11,11 @@
 #         La lista rostros_en_memoria guarda {alumno_id, embedding}.
 #
 #      2. GUARDADO (guardar_rostro):
-#         Al registrar un rostro desde la web, verificamos que haya una cara,
-#         guardamos la foto como {alumno_id}.jpg y actualizamos la memoria
-#         para que funcione sin reiniciar el servidor.
+#         Al registrar un rostro desde la web, verificamos que haya una cara
+#         ÚNICA y clara, y ANTES de guardar comprobamos contra TODOS los rostros
+#         conocidos si esa persona ya existe (duplicado). Solo si NO hay
+#         coincidencia se guarda la foto como {alumno_id}.jpg y se actualiza
+#         la memoria para que funcione sin reiniciar el servidor.
 #
 #      3. IDENTIFICACIÓN (identificar_rostro):
 #         Un nuevo rostro se convierte en embedding y se compara (distancia
@@ -45,14 +47,51 @@ CARPETA_IMAGENES = os.path.join(
 # Formatos de imagen aceptados.
 EXTENSIONES_OK = {"jpg", "jpeg", "png"}
 
-# Umbral de distancia coseno para considerar que es la misma persona.
-# 0.0 = idénticos, 1.0 = totalmente distintos.
-# Más bajo = más estricto; más alto = más permisivo.
-UMBRAL_DISTANCIA = 0.40
+# -----------------------------------------------------------------------------
+# UMBRAL DE COINCIDENCIA (compartido por registro y reconocimiento)
+# -----------------------------------------------------------------------------
+# Distancia coseno entre dos embeddings. 0.0 = rostros idénticos,
+# 1.0 = totalmente distintos. Si dos rostros quedan MÁS CERCANOS que este valor,
+# se decide que son LA MISMA persona. Se puede ajustar desde el entorno
+# (FACE_MATCH_THRESHOLD) sin tocar el código.
+UMBRAL_DISTANCIA = float(os.environ.get("FACE_MATCH_THRESHOLD", "0.40"))
+
+# -----------------------------------------------------------------------------
+# TAMAÑO MÍNIMO DEL ROSTRO (píxeles) durante el registro
+# -----------------------------------------------------------------------------
+# RetinaFace detecta hasta caritas diminutas del fondo (7x7 px). Para el REGISTRO
+# solo contamos los rostros cuyo alto Y ancho superan este valor; los menores se
+# ignoran. Así exigimos un rostro único y claro frente a la cámara. Ajustable
+# con FACE_MIN_FACE_SIZE.
+TAMANO_MINIMO_ROSTRO = int(os.environ.get("FACE_MIN_FACE_SIZE", "40"))
 
 # Lista en MEMORIA con los rostros conocidos:
 #   [ { "alumno_id": 20231045, "embedding": np.array([512 números]) }, ... ]
 rostros_en_memoria = []
+
+
+# -----------------------------------------------------------------------------
+# UTILIDADES SOBRE ROSTROS DETECTADOS
+# -----------------------------------------------------------------------------
+def _rostro_mas_grande(resultado):
+    """
+    Devuelve el dict de DeepFace del rostro con MAYOR área (alto * ancho).
+    Sirve para elegir el sujeto principal cuando una foto trae varias caras.
+    """
+    return max(resultado, key=lambda d: d["facial_area"]["w"] * d["facial_area"]["h"])
+
+
+def _rostros_significativos(resultado):
+    """
+    Filtra los rostros detectados dejando SOLO los que superan
+    TAMANO_MINIMO_ROSTRO (caras pequeñas del fondo no cuentan).
+    Devuelve una lista de dicts de DeepFace.
+    """
+    return [
+        d for d in resultado
+        if d["facial_area"]["w"] >= TAMANO_MINIMO_ROSTRO
+        and d["facial_area"]["h"] >= TAMANO_MINIMO_ROSTRO
+    ]
 
 
 # -----------------------------------------------------------------------------
@@ -98,8 +137,13 @@ def cargar_rostros():
                 detector_backend="retinaface",
                 enforce_detection=True,  # Si no hay cara, lanza excepción.
             )
-            embedding = np.array(resultado[0]["embedding"])
+            # Si la foto trae más de un rostro (accidente histórico), usamos el
+            # MÁS GRANDE (el sujeto principal) y avisamos, sin romper la carga.
+            rostro = _rostro_mas_grande(resultado)
+            embedding = np.array(rostro["embedding"])
             rostros_en_memoria.append({"alumno_id": alumno_id, "embedding": embedding})
+            if len(resultado) > 1:
+                print(f"  ⚠️ {archivo}: {len(resultado)} rostros detectados; se usa el más grande.")
             print(f"  ✅ alumno_id={alumno_id} cargado correctamente")
         except Exception as e:
             print(f"  ❌ Error al procesar {archivo}: {e}")
@@ -112,50 +156,89 @@ def cargar_rostros():
 # -----------------------------------------------------------------------------
 def guardar_rostro(alumno_id, imagen_bytes):
     """
-    Registra el rostro de un alumno desde la cámara web.
+    Registra el rostro de un alumno desde la cámara web, SOLO si esa persona
+    aún no está registrada.
 
     FLUJO:
       1. Se asegura de que exista la carpeta de imágenes.
       2. Convierte los bytes a una imagen (OpenCV).
-      3. Verifica que la imagen contenga una cara y obtiene su embedding (ArcFace).
-      4. Guarda la foto como back/imagenes_conocidas/{alumno_id}.jpg.
-      5. Actualiza el embedding EN MEMORIA (reemplaza el anterior si existía)
-         para que funcione de inmediato.
+      3. Verifica que haya UN SOLO rostro claro (ni cero, ni varios, ni diminuto).
+      4. Extrae su embedding (ArcFace).
+      5. Compara contra TODOS los rostros conocidos en memoria. Si alguno
+         coincide (distancia <= UMBRAL_DISTANCIA), NO guarda y lo avisa:
+         es la misma persona ya registrada, aunque la foto sea diferente.
+      6. Solo si NO hay coincidencia guarda la foto como
+         back/imagenes_conocidas/{alumno_id}.jpg y actualiza la memoria.
 
-    Retorna: (ok: bool, mensaje: str)
+    Retorna: (ok: bool, mensaje: str, info: dict|None)
+      - ok=False con info["ya_registrado"]=True  -> persona duplicada.
+      - ok=False sin esa clave                     -> error de validación.
+      - ok=True                                    -> registro creado.
     """
     # 1. Crear la carpeta si no existe.
     try:
         os.makedirs(CARPETA_IMAGENES, exist_ok=True)
     except Exception as e:
-        return False, f"No se pudo crear la carpeta de imágenes: {e}"
+        return False, f"No se pudo crear la carpeta de imágenes: {e}", None
 
-    # 2-3. Decodificar y validar que haya un rostro.
+    # 2-3. Decodificar y detectar el/los rostro(s).
     try:
         arr = np.frombuffer(imagen_bytes, np.uint8)
         img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
         if img is None:
-            return False, "La imagen recibida no se pudo decodificar."
+            return False, "La imagen recibida no se pudo decodificar.", None
 
-        # enforce_detection=True -> lanza excepción si NO hay una cara.
+        # enforce_detection=True -> lanza excepción si NO hay ninguna cara.
         resultado = DeepFace.represent(
             img_path=img,
             model_name="ArcFace",
             detector_backend="retinaface",
             enforce_detection=True,
         )
-        embedding = np.array(resultado[0]["embedding"])
     except Exception as e:
-        return False, f"No se detectó ningún rostro válido: {e}"
+        return False, f"No se detectó ningún rostro válido: {e}", None
 
-    # 4. Guardar la foto. Si ya existía, se sobrescribe con la nueva.
+    # 4. Validar que haya UN ÚNICO rostro claro frente a la cámara.
+    if not resultado:
+        return False, "No se detectó ningún rostro en la imagen.", None
+
+    significativos = _rostros_significativos(resultado)
+    if not significativos:
+        return False, (
+            "El rostro es demasiado pequeño. Acércate a la cámara."
+        ), None
+    if len(significativos) > 1:
+        return False, (
+            "Se detectaron varios rostros. Asegúrate de que solo haya una "
+            "persona frente a la cámara."
+        ), None
+
+    embedding = np.array(significativos[0]["embedding"])
+
+    # 5. COMPARAR contra TODOS los rostros conocidos (detectar duplicados).
+    existente_id, distancia = buscar_mejor_coincidencia(embedding)
+    if existente_id is not None and distancia <= UMBRAL_DISTANCIA:
+        print(
+            f"  ⛔ Registro bloqueado: alumno_id={alumno_id} coincide con "
+            f"alumno {existente_id} (distancia={distancia:.4f})"
+        )
+        return False, (
+            f"Rostro ya registrado. Coincide con la matrícula {existente_id} "
+            f"(distancia={distancia:.3f}, umbral={UMBRAL_DISTANCIA}). "
+            "No se creó un nuevo registro."
+        ), {
+            "ya_registrado": True,
+            "alumno_existente": existente_id,
+            "distancia": round(float(distancia), 4),
+        }
+
+    # 6. Sin coincidencia: guardar la foto {alumno_id}.jpg y actualizar la memoria.
     ruta = os.path.join(CARPETA_IMAGENES, f"{alumno_id}.jpg")
     try:
         cv2.imwrite(ruta, img)
     except Exception as e:
-        return False, f"Error al guardar la foto: {e}"
+        return False, f"Error al guardar la foto: {e}", None
 
-    # 5. Actualizar la lista en memoria.
     #    Quitamos cualquier entrada anterior del mismo alumno y añadimos la nueva.
     rostros_en_memoria[:] = [
         r for r in rostros_en_memoria if r["alumno_id"] != alumno_id
@@ -164,7 +247,7 @@ def guardar_rostro(alumno_id, imagen_bytes):
 
     print(f"  ✅ Rostro guardado: alumno_id={alumno_id} → {ruta}")
     print(f"  📸 Total de rostros en memoria: {len(rostros_en_memoria)}")
-    return True, f"Rostro registrado correctamente para el alumno {alumno_id}"
+    return True, f"Rostro registrado correctamente para el alumno {alumno_id}", None
 
 
 # -----------------------------------------------------------------------------
@@ -182,6 +265,28 @@ def distancia_coseno(vector_a, vector_b):
     return 1 - np.dot(vector_a, vector_b) / (
         np.linalg.norm(vector_a) * np.linalg.norm(vector_b)
     )
+
+
+def buscar_mejor_coincidencia(embedding):
+    """
+    Compara un embedding contra TODOS los rostros conocidos (rostros_en_memoria)
+    y devuelve el más parecido.
+
+    Retorna: (alumno_id: int|None, distancia: float|None)
+      - (20231045, 0.12) si hay rostros conocidos.
+      - (None, None)     si la carpeta está vacía (aún no hay nadie registrado).
+    """
+    if not rostros_en_memoria:
+        return None, None
+
+    mejor_distancia = float("inf")
+    mejor_id = None
+    for rostro in rostros_en_memoria:
+        d = distancia_coseno(embedding, rostro["embedding"])
+        if d < mejor_distancia:
+            mejor_distancia = d
+            mejor_id = rostro["alumno_id"]
+    return mejor_id, mejor_distancia
 
 
 # -----------------------------------------------------------------------------
@@ -209,26 +314,20 @@ def identificar_rostro(imagen_bytes):
         arr = np.frombuffer(imagen_bytes, np.uint8)
         img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
 
-        # Extraer el embedding del rostro capturado.
+        # Extraer el embedding del rostro capturado. Si la imagen trajera
+        # varias caras, usamos la más grande (el sujeto principal).
         resultado = DeepFace.represent(
             img_path=img,
             model_name="ArcFace",
             detector_backend="retinaface",
             enforce_detection=True,
         )
-        embedding_captura = np.array(resultado[0]["embedding"])
+        embedding_captura = np.array(_rostro_mas_grande(resultado)["embedding"])
     except Exception as e:
         return None, f"No se detectó ningún rostro en la imagen: {e}"
 
     # Recorrer todos los rostros conocidos y quedarse con el más parecido.
-    mejor_distancia = float("inf")
-    mejor_id = None
-
-    for rostro in rostros_en_memoria:
-        d = distancia_coseno(embedding_captura, rostro["embedding"])
-        if d < mejor_distancia:
-            mejor_distancia = d
-            mejor_id = rostro["alumno_id"]
+    mejor_id, mejor_distancia = buscar_mejor_coincidencia(embedding_captura)
 
     print(f"  → Mejor coincidencia: alumno_id={mejor_id}, distancia={mejor_distancia:.4f}")
 

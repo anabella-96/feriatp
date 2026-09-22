@@ -2,7 +2,6 @@
 <section id="section-roles" class="content-section">
     <h2 class="section-title">Roles y Permisos</h2>
     <p class="section-subtitle">Define qué acciones puede realizar cada tipo de usuario</p>
-
     <div class="grid-layout mt-6">
         <div class="col-main">
             <div class="card">
@@ -16,74 +15,156 @@
                         <option value="invitado">Invitado</option>
                     </select>
                 </div>
-
                 <div class="permisos-grid">
                     <div class="permiso-item">
-                        <input type="checkbox" id="permiso_ver" checked>
+                        <input type="checkbox" id="permiso_ver">
                         <label for="permiso_ver">Ver información general</label>
                     </div>
                     <div class="permiso-item">
-                        <input type="checkbox" id="permiso_editar" checked>
+                        <input type="checkbox" id="permiso_editar">
                         <label for="permiso_editar">Editar registros</label>
                     </div>
                     <div class="permiso-item">
-                        <input type="checkbox" id="permiso_eliminar" checked>
+                        <input type="checkbox" id="permiso_eliminar">
                         <label for="permiso_eliminar">Eliminar registros</label>
                     </div>
                     <div class="permiso-item">
-                        <input type="checkbox" id="permiso_crear_usuarios" checked>
+                        <input type="checkbox" id="permiso_crear_usuarios">
                         <label for="permiso_crear_usuarios">Crear y gestionar usuarios</label>
                     </div>
                     <div class="permiso-item">
-                        <input type="checkbox" id="permiso_roles" checked>
+                        <input type="checkbox" id="permiso_roles">
                         <label for="permiso_roles">Modificar roles y permisos</label>
                     </div>
                     <div class="permiso-item">
-                        <input type="checkbox" id="permiso_reportes" checked>
+                        <input type="checkbox" id="permiso_reportes">
                         <label for="permiso_reportes">Generar y descargar reportes</label>
                     </div>
                     <div class="permiso-item">
-                        <input type="checkbox" id="permiso_asistencia" checked>
+                        <input type="checkbox" id="permiso_asistencia">
                         <label for="permiso_asistencia">Gestionar sesiones y asistencia</label>
                     </div>
                     <div class="permiso-item">
-                        <input type="checkbox" id="permiso_configuracion" checked>
+                        <input type="checkbox" id="permiso_configuracion">
                         <label for="permiso_configuracion">Acceder a configuración del sistema</label>
                     </div>
                 </div>
-
                 <div class="mt-6 flex-end">
-                    <button class="btn btn-primary">Guardar cambios de permisos</button>
+                    <button class="btn btn-primary" id="btnGuardarPermisos">Guardar cambios de permisos</button>
                 </div>
             </div>
         </div>
-
         <div class="col-side">
             <div class="card">
                 <h3 class="card-title">Resumen de roles</h3>
-                <ul class="roles-list">
-                    <li>
-                        <span class="role-name">Administrador</span>
-                        <span class="role-count">2 usuarios</span>
-                        <p class="text-xs text-gray-500">Acceso total al sistema</p>
-                    </li>
-                    <li>
-                        <span class="role-name">Profesor</span>
-                        <span class="role-count">86 usuarios</span>
-                        <p class="text-xs text-gray-500">Gestiona cursos y asistencia</p>
-                    </li>
-                    <li>
-                        <span class="role-name">Estudiante</span>
-                        <span class="role-count">1248 usuarios</span>
-                        <p class="text-xs text-gray-500">Solo consulta de su información</p>
-                    </li>
-                    <li>
-                        <span class="role-name">Invitado</span>
-                        <span class="role-count">3 usuarios</span>
-                        <p class="text-xs text-gray-500">Acceso limitado solo a reportes públicos</p>
-                    </li>
+                <ul class="roles-list" id="listaResumenRoles">
+                    <!-- Se actualiza dinámicamente -->
                 </ul>
             </div>
         </div>
     </div>
 </section>
+
+<!-- LÓGICA JAVASCRIPT -->
+<script>
+// Permisos por rol - valores por defecto
+const permisosValoresPorDefecto = {
+    admin: { ver: true, editar: true, eliminar: true, crear_usuarios: true, roles: true, reportes: true, asistencia: true, configuracion: true },
+    profesor: { ver: true, editar: true, eliminar: false, crear_usuarios: false, roles: false, reportes: true, asistencia: true, configuracion: false },
+    estudiante: { ver: true, editar: false, eliminar: false, crear_usuarios: false, roles: false, reportes: false, asistencia: false, configuracion: false },
+    invitado: { ver: true, editar: false, eliminar: false, crear_usuarios: false, roles: false, reportes: true, asistencia: false, configuracion: false }
+};
+
+// Descripciones del resumen
+const descripcionesRoles = {
+    admin: { nombre: "Administrador", descripcion: "Acceso total al sistema" },
+    profesor: { nombre: "Profesor", descripcion: "Gestiona cursos y asistencia" },
+    estudiante: { nombre: "Estudiante", descripcion: "Solo consulta de su información" },
+    invitado: { nombre: "Invitado", descripcion: "Acceso limitado solo a reportes públicos" }
+};
+
+// Cantidad de usuarios por rol (se sincroniza con tu sección de usuarios)
+const cantidadesPorDefecto = { admin: 2, profesor: 86, estudiante: 1248, invitado: 3 };
+
+// Cargar permisos guardados o usar valores por defecto
+let permisos = JSON.parse(localStorage.getItem('permisosRoles')) || permisosValoresPorDefecto;
+let cantidades = JSON.parse(localStorage.getItem('cantidadesRoles')) || cantidadesPorDefecto;
+
+// Elementos del DOM
+const selectorRol = document.getElementById('selectorRol');
+const btnGuardar = document.getElementById('btnGuardarPermisos');
+const checkboxes = {
+    ver: document.getElementById('permiso_ver'),
+    editar: document.getElementById('permiso_editar'),
+    eliminar: document.getElementById('permiso_eliminar'),
+    crear_usuarios: document.getElementById('permiso_crear_usuarios'),
+    roles: document.getElementById('permiso_roles'),
+    reportes: document.getElementById('permiso_reportes'),
+    asistencia: document.getElementById('permiso_asistencia'),
+    configuracion: document.getElementById('permiso_configuracion')
+};
+
+// Iniciar
+document.addEventListener('DOMContentLoaded', () => {
+    cargarPermisosRolActual();
+    renderizarResumen();
+    asignarEventos();
+});
+
+// Cargar los permisos del rol seleccionado
+function cargarPermisosRolActual() {
+    const rol = selectorRol.value;
+    const p = permisos[rol];
+    checkboxes.ver.checked = p.ver;
+    checkboxes.editar.checked = p.editar;
+    checkboxes.eliminar.checked = p.eliminar;
+    checkboxes.crear_usuarios.checked = p.crear_usuarios;
+    checkboxes.roles.checked = p.roles;
+    checkboxes.reportes.checked = p.reportes;
+    checkboxes.asistencia.checked = p.asistencia;
+    checkboxes.configuracion.checked = p.configuracion;
+}
+
+// Guardar cambios del rol actual
+function guardarPermisos() {
+    const rol = selectorRol.value;
+    permisos[rol] = {
+        ver: checkboxes.ver.checked,
+        editar: checkboxes.editar.checked,
+        eliminar: checkboxes.eliminar.checked,
+        crear_usuarios: checkboxes.crear_usuarios.checked,
+        roles: checkboxes.roles.checked,
+        reportes: checkboxes.reportes.checked,
+        asistencia: checkboxes.asistencia.checked,
+        configuracion: checkboxes.configuracion.checked
+    };
+    localStorage.setItem('permisosRoles', JSON.stringify(permisos));
+    alert('✅ Permisos guardados correctamente');
+    renderizarResumen();
+}
+
+// Renderizar lista del resumen
+function renderizarResumen() {
+    const lista = document.getElementById('listaResumenRoles');
+    lista.innerHTML = '';
+    for (const [clave, datos] of Object.entries(descripcionesRoles)) {
+        const permisosRol = permisos[clave];
+        const total = Object.values(permisosRol).filter(Boolean).length;
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <span class="role-name">${datos.nombre}</span>
+            <span class="role-count">${cantidades[clave]} usuarios</span>
+            <p class="text-xs text-gray-500">${datos.descripcion} · ${total} permisos activos</p>
+        `;
+        lista.appendChild(li);
+    }
+}
+
+// Asignar eventos
+function asignarEventos() {
+    // Cambiar de rol en el selector → cargar sus permisos
+    selectorRol.addEventListener('change', cargarPermisosRolActual);
+    // Botón guardar
+    btnGuardar.addEventListener('click', guardarPermisos);
+}
+</script>

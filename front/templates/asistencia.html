@@ -11,7 +11,7 @@
        #btn-iniciar-camara            -> botón principal para encender la cámara
        #btn-capturar                  -> botón para REGISTRAR ASISTENCIA (/reconocer)
        #btn-registrar-rostro          -> botón para REGISTRAR UN ROSTRO NUEVO
-       #input-alumno-registrar        -> input con el ID del alumno a registrar
+       #select-alumno-registrar       -> selector con la matrícula (ID automático)
        #asistencia-status-badge etc.  -> panel de estado que se actualiza tras reconocer
 ============================================================================= -->
 <section id="section-asistencia" class="content-section">
@@ -32,40 +32,49 @@
                 <p class="text-sm text-gray-500 mb-4">Fecha: 07/07/2026 | Hora: 10:00 - 11:30 | Profesor: Fernando Ojeda</p>
 
                 <div class="camera-container">
-                    <div class="camera-view" style="position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #111827; border-radius: 8px; height: 350px;">
-                        <video id="video" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
-                        <canvas id="canvas" width="400" height="300" style="display: none;"></canvas>
-                        <div id="camera-placeholder" style="position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: white; width: 100%; height: 100%; top: 0; left: 0; background-color: #111827; z-index: 2;">
+                    <div class="camera-view">
+                        <video id="video" autoplay playsinline muted></video>
+                        <canvas id="canvas" width="640" height="480"></canvas>
+                        <div id="camera-placeholder" class="camera-placeholder">
                             <i class="fa-solid fa-video fa-4x text-gray-300"></i>
                             <p id="camera-placeholder-text">Cámara inactiva - Presiona "Iniciar cámara"</p>
                         </div>
                     </div>
 
-                    <div class="camera-controls" style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center;">
-                        <button id="btn-iniciar-camara" class="btn btn-primary" style="padding: 0.75rem 1.5rem; background-color: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
-                            <i class="fa-solid fa-video"></i> Iniciar cámara
-                        </button>
-                        <button id="btn-capturar" class="btn btn-success" style="padding: 0.75rem 1.5rem; background-color: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
-                            <i class="fa-solid fa-camera"></i> Registrar asistencia
-                        </button>
-                    </div>
-
-                    <div id="resultado-container" class="resultado-box" style="margin-top: 1rem; padding: 0.75rem; border-radius: 6px; text-align: center; font-weight: 500; min-height: 40px; display: none;">
-                        <span id="resultado"></span>
-                    </div>
-
-                    <div class="camera-status" style="margin-top: 1rem;">
-                        <span class="status-badge" id="asistencia-status-badge" style="background-color: #e5e7eb; color: #374151; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">Inactivo</span>
-                        <p id="asistencia-nombre" style="margin-top: 0.5rem; font-weight: 500;">Última detección: Ninguna</p>
-                        <p class="text-xs" id="asistencia-hora" style="font-size: 0.75rem; color: #6b7280;">Hora: --:--:--</p>
-                        <p class="text-xs" id="asistencia-confianza" style="font-size: 0.75rem; color: #6b7280;">Confianza: --%</p>
-                        <div class="mt-4" style="margin-top: 1rem;">
-                            <p class="text-sm font-medium" id="asistencia-contador" style="font-size: 0.875rem;">Total registrados: 32 / 45</p>
-                            <div class="progress-bar mt-1" style="background-color: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 0.25rem;">
+                    <div class="camera-status">
+                        <span class="status-badge" id="asistencia-status-badge">Inactivo</span>
+                        <p id="asistencia-nombre" class="font-medium">Última detección: Ninguna</p>
+                        <p class="text-xs" id="asistencia-hora">Hora: --:--:--</p>
+                        <p class="text-xs" id="asistencia-confianza">Confianza: --%</p>
+                        <div class="mt-4">
+                            <p class="text-sm font-medium" id="asistencia-contador">Total registrados: 32 / 45</p>
+                            <div class="progress-bar mt-1">
                                 <div id="asistencia-progreso-bar" style="width:71%; background-color: #2563eb; height: 100%;"></div>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div class="camera-controls">
+                    <div class="camera-sel">
+                        <label for="camera-select" class="text-sm font-medium">Cámara activa</label>
+                        <select id="camera-select" class="form-control">
+                            <option value="auto">📷 Cámara automática</option>
+                        </select>
+                    </div>
+                    <button id="btn-iniciar-camara" class="btn btn-primary">
+                        <i class="fa-solid fa-video"></i> Iniciar cámara
+                    </button>
+                    <button id="btn-detener-camara-main" class="btn btn-secondary">
+                        <i class="fa-solid fa-stop"></i> Apagar cámara
+                    </button>
+                    <button id="btn-capturar" class="btn btn-success">
+                        <i class="fa-solid fa-camera"></i> Registrar asistencia
+                    </button>
+                </div>
+
+                <div id="resultado-container" class="resultado-box">
+                    <span id="resultado"></span>
                 </div>
 
                 <div id="resultado-reconocimiento" style="margin-top: 0.5rem; padding: 0.5rem; border-radius: var(--radius); text-align: center; font-size: 0.85rem; font-weight: 500; display: none;"></div>
@@ -73,13 +82,17 @@
 
             <div class="card mt-6">
                 <h3 class="card-title">Registrar nuevo rostro</h3>
-                <p class="text-sm text-gray-500 mb-4">Ingresa el ID del alumno (debe existir en la base de datos), enciende la cámara y presiona el botón para guardar su rostro. La foto quedará disponible para el reconocimiento.</p>
+                <p class="text-sm text-gray-500 mb-4">La matrícula se asigna automáticamente: elige al alumno que aún no tiene rostro, enciende la cámara y presiona el botón. La foto quedará disponible para el reconocimiento.</p>
                 <div class="flex-between" style="gap: 1rem; flex-wrap: wrap;">
-                    <input type="number" id="input-alumno-registrar" class="form-control" placeholder="ID del alumno (ej: 20231045)" style="max-width: 260px;">
+                    <label for="select-alumno-registrar" class="text-sm font-medium" style="min-width: 140px;">Alumno a registrar</label>
+                    <select id="select-alumno-registrar" class="form-control" style="flex: 1 1 240px; max-width: 360px;">
+                        <option value="">Cargando alumnos sin rostro...</option>
+                    </select>
                     <button id="btn-registrar-rostro" class="btn btn-primary" style="padding: 0.75rem 1.5rem; background-color: #7c3aed; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
                         <i class="fa-solid fa-user-plus"></i> Registrar rostro
                     </button>
                 </div>
+                <p id="alumno-registrar-aviso" class="text-sm" style="margin-top: 0.5rem; font-weight: 600; color: #7c3aed; display: none;"></p>
                 <div id="registro-rostro-resultado" class="resultado-box" style="margin-top: 1rem; padding: 0.75rem; border-radius: 6px; text-align: center; font-weight: 500; min-height: 40px; display: none;"></div>
             </div>
 
@@ -167,11 +180,11 @@
             <div class="card mt-6">
                 <h3 class="card-title">Controles de sesión</h3>
                 <div class="controls-list">
-                    <button class="btn btn-primary w-full" id="btn-iniciar-camara-side">Iniciar sesión / cámara</button>
-                    <button class="btn btn-secondary w-full" id="btn-detener-camara">Pausar reconocimiento</button>
-                    <button class="btn btn-warning w-full" id="btn-capturar-asistencia">📸 Registrar asistencia</button>
-                    <button class="btn btn-outline w-full">Exportar registro</button>
-                    <button class="btn btn-danger w-full">Finalizar sesión</button>
+                    <button class="btn btn-primary w-full" id="btn-iniciar-camara-side"><i class="fa-solid fa-video"></i> Iniciar sesión / cámara</button>
+                    <button class="btn btn-secondary w-full" id="btn-detener-camara"><i class="fa-solid fa-pause"></i> Pausar reconocimiento</button>
+                    <button class="btn btn-warning w-full" id="btn-capturar-asistencia"><i class="fa-solid fa-camera"></i> Registrar asistencia</button>
+                    <button class="btn btn-outline w-full"><i class="fa-solid fa-file-export"></i> Exportar registro</button>
+                    <button class="btn btn-danger w-full"><i class="fa-solid fa-flag-checkered"></i> Finalizar sesión</button>
                 </div>
             </div>
         </div>

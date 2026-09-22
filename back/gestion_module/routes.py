@@ -87,6 +87,42 @@ def _ejecutar_y_cerrar(conn, sql, params=()):
 # 1) ESTUDIANTES (tabla `alumnos`)
 # -----------------------------------------------------------------------------
 
+def _tiene_foto_rostro(alumno_id):
+    """
+    ¿El alumno ya tiene una foto de rostro guardada?
+    (imagenes_conocidas/{id}.jpg o cualquier extensión soportada).
+    """
+    for ext in (".jpg", ".jpeg", ".png"):
+        if os.path.exists(os.path.join(CARPETA_FOTOS, f"{alumno_id}{ext}")):
+            return True
+    return False
+
+
+@gestion_bp.route("/api/estudiantes/sin_rostro", methods=["GET"])
+@login_required
+def listar_estudiantes_sin_rostro():
+    """
+    Lista SOLO los estudiantes que todavía NO tienen rostro registrado
+    (no existe imagenes_conocidas/{id}.jpg).
+
+    El frontend usa esta lista para el selector de "Registrar nuevo rostro":
+    la matrícula se elige automáticamente (nunca se digita), con lo que no se
+    puede apuntar a un alumno equivocado, sobrescribir una foto ajena ni
+    registrar caras con IDs inventados.
+    """
+    try:
+        conn = _conectar()
+        filas = _ejecutar_y_cerrar(
+            conn,
+            "SELECT id, nombre, apellido, correo, curso, estado FROM alumnos ORDER BY id",
+        )
+    except ConnectionError as e:
+        return _json_error(f"Error de conexión a la BD: {e}", 500)
+
+    sin_rostro = [fila for fila in filas if not _tiene_foto_rostro(fila["id"])]
+    return jsonify({"ok": True, "datos": sin_rostro})
+
+
 @gestion_bp.route("/api/estudiantes", methods=["GET"])
 @login_required
 def listar_estudiantes():

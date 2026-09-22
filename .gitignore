@@ -3,3 +3,6 @@ venv/
 .venv/
 env/
 .env/
+
+# Certificados SSL generados localmente
+back/ssl/

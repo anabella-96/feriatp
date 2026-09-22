@@ -250,14 +250,25 @@ function recargarLista(tipo) {
 // -----------------------------------------------------------------------------
 
 // Función global para que el botón "Registrar su rostro" y los de cada fila
-// lleven al usuario a la cámara con la matrícula ya escrita.
+// lleven al usuario a la cámara con ese alumno ya SELECCIONADO automáticamente
+// (la matrícula nunca se digita; sale del selector de alumnos sin rostro).
 function irARegistrarRostro(id) {
+    // Recordar la matrícula pendiente ANTES de navegar: si la página se recarga
+    // (p. ej. redirección a HTTPS de la cámara o F5), el selector de abajo la
+    // vuelve a pre-seleccionar y no se pierde el ID ni el flujo de registro.
+    try { sessionStorage.setItem('await_rostro', String(id)); } catch (e) { /* sin storage */ }
+
+    // La misma matrícula como parámetro "?rostro=" sobrevive incluso si el
+    // navegador cambia de origen (http://IP:5000 -> https://IP:5001).
+    const current = new URLSearchParams(window.location.search);
+    current.set('rostro', String(id));
+    window.history.replaceState({}, '', window.location.pathname + '?' + current.toString());
+
     // 1. Navegar a la sección "Asistencia en tiempo real" usando el sidebar.
     const linkAsistencia = document.querySelector('.nav-link[data-section="asistencia"]');
     if (linkAsistencia) linkAsistencia.click();
-    // 2. Auto-completar el input del ID del alumno en la tarjeta de rostro.
-    const input = document.getElementById('input-alumno-registrar');
-    if (input) input.value = id;
+    // 2. Seleccionar automáticamente al alumno en el selector (ID automático).
+    if (typeof cargarAlumnosSinRostro === 'function') cargarAlumnosSinRostro(id);
     // 3. Encender la cámara automáticamente (función global de script.js).
     if (typeof encenderCamara === 'function') encenderCamara();
 }

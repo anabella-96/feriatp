@@ -2,15 +2,13 @@
 <section id="section-usuarios" class="content-section">
     <h2 class="section-title">Gestión de Usuarios</h2>
     <p class="section-subtitle">Control de accesos, cuentas y datos de acceso al sistema</p>
-
     <div class="flex-between mt-6 mb-4">
         <div class="search-box">
-            <input type="text" placeholder="Buscar por usuario o correo...">
+            <input type="text" id="buscador" placeholder="Buscar por usuario o correo...">
             <i class="fa-solid fa-magnifying-glass"></i>
         </div>
-        <button class="btn btn-primary">+ Nuevo Usuario</button>
+        <button class="btn btn-primary" id="btnNuevoUsuario">+ Nuevo Usuario</button>
     </div>
-
     <div class="card">
         <div class="table-container">
             <table class="data-table" id="tablaUsuarios">
@@ -25,61 +23,211 @@
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>carlosr</td>
-                        <td>Carlos Ramírez</td>
-                        <td>admin@asistec.edu</td>
-                        <td>Administrador</td>
-                        <td>07/07/2026 08:10</td>
-                        <td><span class="status active">Activo</span></td>
-                        <td>
-                            <button class="btn-icon"><i class="fa-solid fa-key"></i></button>
-                            <button class="btn-icon"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-icon"><i class="fa-solid fa-ban text-danger"></i></button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>luism</td>
-                        <td>Luis Martínez</td>
-                        <td>luis@asistec.edu</td>
-                        <td>Profesor</td>
-                        <td>07/07/2026 07:45</td>
-                        <td><span class="status active">Activo</span></td>
-                        <td>
-                            <button class="btn-icon"><i class="fa-solid fa-key"></i></button>
-                            <button class="btn-icon"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-icon"><i class="fa-solid fa-ban text-danger"></i></button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>anar</td>
-                        <td>Ana Ruiz</td>
-                        <td>ana@asistec.edu</td>
-                        <td>Profesor</td>
-                        <td>06/07/2026 16:20</td>
-                        <td><span class="status active">Activo</span></td>
-                        <td>
-                            <button class="btn-icon"><i class="fa-solid fa-key"></i></button>
-                            <button class="btn-icon"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-icon"><i class="fa-solid fa-ban text-danger"></i></button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>sofiah</td>
-                        <td>Sofía Herrera</td>
-                        <td>sofia@asistec.edu</td>
-                        <td>Profesor</td>
-                        <td>01/07/2026 09:05</td>
-                        <td><span class="status blocked">Bloqueado</span></td>
-                        <td>
-                            <button class="btn-icon"><i class="fa-solid fa-key"></i></button>
-                            <button class="btn-icon"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn-icon"><i class="fa-solid fa-unlock text-success"></i></button>
-                        </td>
-                    </tr>
+                <tbody id="cuerpoTabla">
+                    <!-- Los usuarios se cargan dinámicamente -->
                 </tbody>
             </table>
         </div>
     </div>
 </section>
+
+<!-- MODAL: Formulario Nuevo / Editar Usuario -->
+<div id="modalUsuario" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="background: #fff; margin: 2rem auto; max-width: 500px; width: 90%; border-radius: 8px; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;">
+            <h3 id="tituloModal" style="margin:0;">➕ Agregar Nuevo Usuario</h3>
+            <span id="cerrarModal" style="font-size: 1.5rem; cursor: pointer; color: #888;">&times;</span>
+        </div>
+        <form id="formUsuario">
+            <input type="hidden" id="indiceEdicion">
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.3rem;">Usuario (login)</label>
+                <input type="text" id="usuario" required style="width:100%; padding:0.6rem; border:1px solid #ddd; border-radius:4px;" placeholder="ej: carlosr">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.3rem;">Nombre completo</label>
+                <input type="text" id="nombreCompleto" required style="width:100%; padding:0.6rem; border:1px solid #ddd; border-radius:4px;" placeholder="Nombre y apellido">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.3rem;">Correo electrónico</label>
+                <input type="email" id="correo" required style="width:100%; padding:0.6rem; border:1px solid #ddd; border-radius:4px;" placeholder="correo@ejemplo.com">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.3rem;">Rol asignado</label>
+                <select id="rol" required style="width:100%; padding:0.6rem; border:1px solid #ddd; border-radius:4px;">
+                    <option value="">Selecciona un rol</option>
+                    <option value="Administrador">Administrador</option>
+                    <option value="Profesor">Profesor</option>
+                    <option value="Estudiante">Estudiante</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 1rem;" id="campoClave">
+                <label style="display: block; margin-bottom: 0.3rem;">Contraseña</label>
+                <input type="password" id="clave" style="width:100%; padding:0.6rem; border:1px solid #ddd; border-radius:4px;" placeholder="Mínimo 6 caracteres">
+            </div>
+            <div style="text-align: right; margin-top: 1.2rem;">
+                <button type="button" class="btn btn-secondary" id="btnCancelar" style="margin-right: 0.5rem;">Cancelar</button>
+                <button type="submit" class="btn btn-primary">💾 Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- LÓGICA JAVASCRIPT - TODAS LAS FUNCIONES ACTIVAS -->
+<script>
+// Datos iniciales
+const datosIniciales = [
+    { usuario: "carlosr", nombre: "Carlos Ramírez", correo: "admin@asistec.edu", rol: "Administrador", ultimoAcceso: "07/07/2026 08:10", estado: "Activo" },
+    { usuario: "luism", nombre: "Luis Martínez", correo: "luis@asistec.edu", rol: "Profesor", ultimoAcceso: "07/07/2026 07:45", estado: "Activo" },
+    { usuario: "anar", nombre: "Ana Ruiz", correo: "ana@asistec.edu", rol: "Profesor", ultimoAcceso: "06/07/2026 16:20", estado: "Activo" },
+    { usuario: "sofiah", nombre: "Sofía Herrera", correo: "sofia@asistec.edu", rol: "Profesor", ultimoAcceso: "01/07/2026 09:05", estado: "Bloqueado" }
+];
+
+let usuarios = JSON.parse(localStorage.getItem('usuarios')) || datosIniciales;
+let indiceEdicion = null;
+
+const modal = document.getElementById('modalUsuario');
+const formUsuario = document.getElementById('formUsuario');
+const cuerpoTabla = document.getElementById('cuerpoTabla');
+const buscador = document.getElementById('buscador');
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderizarTabla();
+    asignarEventos();
+});
+
+// CARGAR TABLA
+function renderizarTabla(filtro = '') {
+    cuerpoTabla.innerHTML = '';
+    const filtrados = usuarios.filter(u => 
+        u.usuario.toLowerCase().includes(filtro.toLowerCase()) || 
+        u.correo.toLowerCase().includes(filtro.toLowerCase()) ||
+        u.nombre.toLowerCase().includes(filtro.toLowerCase())
+    );
+
+    filtrados.forEach((u) => {
+        const indiceReal = usuarios.indexOf(u);
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+            <td>${u.usuario}</td>
+            <td>${u.nombre}</td>
+            <td>${u.correo}</td>
+            <td>${u.rol}</td>
+            <td>${u.ultimoAcceso}</td>
+            <td><span class="status ${u.estado === 'Activo' ? 'active' : 'blocked'}">${u.estado}</span></td>
+            <td>
+                <button class="btn-icon" title="Restablecer contraseña" onclick="restablecerClave(${indiceReal})"><i class="fa-solid fa-key"></i></button>
+                <button class="btn-icon" title="Editar usuario" onclick="editarUsuario(${indiceReal})"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn-icon" title="${u.estado === 'Activo' ? 'Bloquear' : 'Desbloquear'}" onclick="cambiarEstado(${indiceReal})">
+                    <i class="fa-solid fa-${u.estado === 'Activo' ? 'ban text-danger' : 'unlock text-success'}"></i>
+                </button>
+                <button class="btn-icon" title="Eliminar usuario" onclick="eliminarUsuario(${indiceReal})"><i class="fa-solid fa-trash text-danger"></i></button>
+            </td>
+        `;
+        cuerpoTabla.appendChild(fila);
+    });
+}
+
+// ASIGNAR EVENTOS
+function asignarEventos() {
+    // ABRIR MODAL PARA AGREGAR
+    document.getElementById('btnNuevoUsuario').addEventListener('click', () => {
+        indiceEdicion = null;
+        formUsuario.reset();
+        document.getElementById('tituloModal').textContent = '➕ Agregar Nuevo Usuario';
+        document.getElementById('campoClave').style.display = 'block';
+        modal.style.display = 'block';
+    });
+
+    // CERRAR MODAL
+    document.getElementById('cerrarModal').onclick = () => modal.style.display = 'none';
+    document.getElementById('btnCancelar').onclick = () => modal.style.display = 'none';
+    window.onclick = e => { if(e.target === modal) modal.style.display = 'none'; };
+
+    // GUARDAR (AGREGAR / EDITAR)
+    formUsuario.addEventListener('submit', e => {
+        e.preventDefault();
+        const usuario = document.getElementById('usuario').value.trim();
+        const nombre = document.getElementById('nombreCompleto').value.trim();
+        const correo = document.getElementById('correo').value.trim();
+        const rol = document.getElementById('rol').value.trim();
+
+        if (!usuario || !nombre || !correo || !rol) {
+            alert('⚠️ Completa todos los campos');
+            return;
+        }
+
+        const fechaActual = new Date().toLocaleDateString("es-ES") + ' ' + 
+            new Date().toLocaleTimeString("es-ES", {hour:'2-digit', minute:'2-digit'});
+
+        if (indiceEdicion !== null) {
+            // EDITAR USUARIO EXISTENTE
+            usuarios[indiceEdicion] = { ...usuarios[indiceEdicion], usuario, nombre, correo, rol };
+            alert('✅ Usuario actualizado correctamente');
+        } else {
+            // AGREGAR NUEVO USUARIO
+            usuarios.push({ usuario, nombre, correo, rol, ultimoAcceso: fechaActual, estado: "Activo" });
+            alert('✅ Usuario agregado correctamente');
+        }
+
+        guardar();
+        renderizarTabla(buscador.value);
+        modal.style.display = 'none';
+    });
+
+    // BUSCADOR EN TIEMPO REAL
+    buscador.addEventListener('input', e => renderizarTabla(e.target.value));
+}
+
+// --- FUNCIONES DE ACCIONES ---
+
+// EDITAR USUARIO
+window.editarUsuario = function(i) {
+    indiceEdicion = i;
+    const u = usuarios[i];
+    document.getElementById('usuario').value = u.usuario;
+    document.getElementById('nombreCompleto').value = u.nombre;
+    document.getElementById('correo').value = u.correo;
+    document.getElementById('rol').value = u.rol;
+    document.getElementById('clave').value = '';
+    document.getElementById('tituloModal').textContent = '✏️ Editar Usuario';
+    document.getElementById('campoClave').style.display = 'none';
+    modal.style.display = 'block';
+};
+
+// ELIMINAR USUARIO
+window.eliminarUsuario = function(i) {
+    if (confirm('⚠️ ¿Estás seguro de eliminar este usuario?\n¡Esta acción no se puede deshacer!')) {
+        usuarios.splice(i, 1);
+        guardar();
+        renderizarTabla(buscador.value);
+        alert('✅ Usuario eliminado correctamente');
+    }
+};
+
+// CAMBIAR ESTADO (BLOQUEAR / DESBLOQUEAR)
+window.cambiarEstado = function(i) {
+    usuarios[i].estado = usuarios[i].estado === 'Activo' ? 'Bloqueado' : 'Activo';
+    guardar();
+    renderizarTabla(buscador.value);
+};
+
+// RESTABLECER CONTRASEÑA
+window.restablecerClave = function(i) {
+    const nuevaClave = prompt('🔑 Ingresa la nueva contraseña (mínimo 6 caracteres):');
+    if (nuevaClave === null) return;
+    if (nuevaClave.length >= 6) {
+        usuarios[i].ultimoAcceso = new Date().toLocaleDateString("es-ES") + ' ' + 
+            new Date().toLocaleTimeString("es-ES", {hour:'2-digit', minute:'2-digit'});
+        guardar();
+        alert('✅ Contraseña restablecida correctamente');
+    } else {
+        alert('⚠️ La contraseña debe tener al menos 6 caracteres');
+    }
+};
+
+// GUARDAR DATOS EN ALMACENAMIENTO LOCAL
+function guardar() {
+    localStorage.setItem('usuarios', JSON.stringify(usuarios));
+}
+</script>

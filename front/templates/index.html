@@ -25,12 +25,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BIOMETRIC- Sistema de Control de Asistencia</title>
     <meta name="description" content="Sistema de control de asistencia biométrica con reconocimiento facial en tiempo real">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:,">
+    <!-- Sin fuentes externas de Google: usamos la pila de fuentes del sistema
+         (más rápido: sin conexiones a internet, no bloquea la pantalla y carga
+         igual en cualquier red). -->
+    <!-- Font Awesome LOCAL (funciona sin internet, también desde la red local).
+         Antes se cargaba desde CDN y en otros dispositivos sin internet los iconos no aparecían. -->
+    <link rel="stylesheet" href="/vendor/fontawesome/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- Chart.js LOCAL (con defer para no bloquear la carga del HTML) -->
+    <script src="/vendor/chartjs/chart.umd.min.js" defer></script>
 </head>
 <body>
     <div class="app-container">
@@ -80,7 +84,7 @@
 
             <div class="sidebar-footer">
                 <div class="user-mini">
-                    <img src="https://picsum.photos/id/1005/200/200" alt="Usuario">
+                    <div class="avatar-inicial">{{ (usuario.nombre or 'U')[:1] | upper }}</div>
                     <div>
                         <p>{{ usuario.nombre if usuario else 'Usuario' }}</p>
                         <span>{{ usuario.rol if usuario else 'Sin sesión' }}</span>
@@ -91,6 +95,9 @@
                 </div>
             </div>
         </aside>
+
+        <!-- Fondo oscuro del menú lateral en pantallas pequeñas (móvil/tablet). -->
+        <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
 
         <!--  Contenido principal -->
         <main class="main-content">
@@ -140,9 +147,9 @@
 
     <!-- Script principal: navegación entre secciones + control de cámara +
          registro de asistencia + registro de rostros + gráficos (Chart.js). -->
-    <script src="/js/script.js"></script>
+    <script src="/js/script.js" defer></script>
     <!-- Script de gestión académica: carga las tablas de Estudiantes, Cursos,
          Profesores y Sesiones desde las APIs y controla sus modales. -->
-    <script src="/js/gestion.js"></script>
+    <script src="/js/gestion.js" defer></script>
 </body>
 </html>

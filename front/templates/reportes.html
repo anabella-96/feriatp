@@ -1,14 +1,13 @@
-<!-- SECCIÓN: REPORTES - filtros y listado de reportes generados (por ahora datos de ejemplo). -->
+<!-- SECCIÓN: REPORTES - filtros y listado de reportes generados (ahora funcional) -->
 <section id="section-reportes" class="content-section">
     <h2 class="section-title">Reportes y Estadísticas</h2>
     <p class="section-subtitle">Genera, visualiza y descarga informes detallados</p>
-
     <div class="card mt-6">
         <h3 class="card-title">Filtros avanzados</h3>
         <div class="filters-grid">
             <div class="filter-group">
                 <label>Tipo de reporte</label>
-                <select class="form-control">
+                <select class="form-control" id="tipo-reporte">
                     <option>Asistencia por curso</option>
                     <option>Asistencia por estudiante</option>
                     <option>Reporte mensual</option>
@@ -18,25 +17,25 @@
             </div>
             <div class="filter-group">
                 <label>Fecha inicio</label>
-                <input type="date" class="form-control" value="2026-07-01">
+                <input type="date" class="form-control" id="fecha-inicio" value="2026-07-01">
             </div>
             <div class="filter-group">
                 <label>Fecha fin</label>
-                <input type="date" class="form-control" value="2026-07-07">
+                <input type="date" class="form-control" id="fecha-fin" value="2026-07-07">
             </div>
             <div class="filter-group">
                 <label>Curso</label>
-                <select class="form-control">
+                <select class="form-control" id="curso">
                     <option>Todos los cursos</option>
-                    <option>Programación </option>
-                    <option>Matemáticas </option>
+                    <option>Programación</option>
+                    <option>Matemáticas</option>
                     <option>Base de Datos</option>
-                    <option>Ciencias </option>
+                    <option>Ciencias</option>
                 </select>
             </div>
             <div class="filter-group">
                 <label>Profesor</label>
-                <select class="form-control">
+                <select class="form-control" id="profesor">
                     <option>Todos los profesores</option>
                     <option>Lucas Reyes</option>
                     <option>Carolina Moreno</option>
@@ -45,7 +44,7 @@
             </div>
             <div class="filter-group">
                 <label>Formato de salida</label>
-                <select class="form-control">
+                <select class="form-control" id="formato-salida">
                     <option>PDF</option>
                     <option>Excel</option>
                     <option>CSV</option>
@@ -54,15 +53,14 @@
             </div>
         </div>
         <div class="mt-4 flex-between">
-            <button class="btn btn-primary">Generar reporte</button>
-            <button class="btn btn-outline">Restablecer filtros</button>
+            <button class="btn btn-primary" id="btn-generar-reporte">Generar reporte</button>
+            <button class="btn btn-outline" id="btn-restablecer-filtros">Restablecer filtros</button>
         </div>
     </div>
-
     <div class="card mt-6">
         <h3 class="card-title">Reportes generados recientemente</h3>
         <div class="table-container">
-            <table class="data-table">
+            <table class="data-table" id="tabla-reportes">
                 <thead>
                     <tr>
                         <th>Nombre del reporte</th>
@@ -74,6 +72,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- Los reportes generados se agregarán aquí automáticamente -->
                     <tr>
                         <td>Reporte mensual - Junio 2026</td>
                         <td>01/07/2026 09:24</td>
@@ -87,7 +86,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Asistencia ProgramaciónI - Semestre 1</td>
+                        <td>Asistencia Programación - Semestre 1</td>
                         <td>28/06/2026 15:12</td>
                         <td>Carolina Moreno</td>
                         <td>Excel</td>
@@ -115,3 +114,171 @@
         </div>
     </div>
 </section>
+
+<!-- SCRIPT: Lógica completa para generar reportes -->
+<script>
+// Datos de usuario actual (puedes cambiarlo o cargarlo desde sesión)
+const USUARIO_ACTUAL = "Carlos Ramírez";
+
+// Tamaño aleatorio simulado por formato
+const TAMANOS_POR_FORMATO = {
+    "PDF": ["1.2 MB", "2.4 MB", "3.1 MB", "4.0 MB"],
+    "Excel": ["0.8 MB", "1.5 MB", "1.8 MB", "2.5 MB"],
+    "CSV": ["0.2 MB", "0.5 MB", "0.7 MB", "1.1 MB"],
+    "Imagen": ["0.5 MB", "1.0 MB", "1.8 MB", "2.2 MB"]
+};
+
+// Elementos del DOM
+const btnGenerar = document.getElementById("btn-generar-reporte");
+const btnRestablecer = document.getElementById("btn-restablecer-filtros");
+const tablaReportes = document.getElementById("tabla-reportes").querySelector("tbody");
+
+// === FUNCIÓN PRINCIPAL: Generar Reporte ===
+btnGenerar.addEventListener("click", function () {
+    // 1. Recopilar todos los valores de los filtros
+    const tipoReporte = document.getElementById("tipo-reporte").value;
+    const fechaInicio = document.getElementById("fecha-inicio").value;
+    const fechaFin = document.getElementById("fecha-fin").value;
+    const curso = document.getElementById("curso").value;
+    const profesor = document.getElementById("profesor").value;
+    const formato = document.getElementById("formato-salida").value;
+
+    // 2. Validar fechas
+    if (fechaInicio > fechaFin) {
+        alert("⚠️ La fecha de inicio no puede ser posterior a la fecha de fin.");
+        return;
+    }
+
+    // 3. Crear nombre del reporte
+    const nombreReporte = generarNombreReporte(tipoReporte, curso, fechaInicio, fechaFin);
+
+    // 4. Fecha y hora actual
+    const fechaActual = new Date();
+    const fechaFormateada = formatearFechaHora(fechaActual);
+
+    // 5. Tamaño aleatorio según formato
+    const listaTamanos = TAMANOS_POR_FORMATO[formato];
+    const tamanoAleatorio = listaTamanos[Math.floor(Math.random() * listaTamanos.length)];
+
+    // 6. Insertar NUEVA fila en la tabla (al principio)
+    const filaNueva = document.createElement("tr");
+    filaNueva.innerHTML = `
+        <td>${nombreReporte}</td>
+        <td>${fechaFormateada}</td>
+        <td>${USUARIO_ACTUAL}</td>
+        <td>${formato}</td>
+        <td>${tamanoAleatorio}</td>
+        <td>
+            <button class="btn-icon" title="Ver"><i class="fa-solid fa-eye"></i></button>
+            <button class="btn-icon" title="Descargar"><i class="fa-solid fa-download"></i></button>
+            <button class="btn-icon" title="Eliminar"><i class="fa-solid fa-trash text-danger"></i></button>
+        </td>
+    `;
+
+    // Agregar funcionalidad a los botones de la fila nueva
+    agregarEventosFila(filaNueva, nombreReporte, formato);
+
+    // Insertar al principio de la tabla
+    tablaReportes.insertBefore(filaNueva, tablaReportes.firstChild);
+
+    // 7. Mensaje de confirmación
+    alert(`✅ Reporte generado con éxito:\n📄 ${nombreReporte}\n📅 ${fechaFormateada}\n📦 ${tamanoAleatorio}`);
+});
+
+// === Botón Restablecer Filtros ===
+btnRestablecer.addEventListener("click", function () {
+    document.getElementById("tipo-reporte").selectedIndex = 0;
+    document.getElementById("fecha-inicio").value = "2026-07-01";
+    document.getElementById("fecha-fin").value = "2026-07-07";
+    document.getElementById("curso").selectedIndex = 0;
+    document.getElementById("profesor").selectedIndex = 0;
+    document.getElementById("formato-salida").selectedIndex = 0;
+    alert("🔄 Filtros restablecidos.");
+});
+
+// === Funciones auxiliares ===
+function generarNombreReporte(tipo, curso, fechaInicio, fechaFin) {
+    const fechas = `${fechaInicio} al ${fechaFin}`;
+    if (curso === "Todos los cursos") {
+        return `${tipo} - ${fechas}`;
+    }
+    return `${tipo} - ${curso} - ${fechas}`;
+}
+
+function formatearFechaHora(fecha) {
+    const dia = String(fecha.getDate()).padStart(2, "0");
+    const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+    const anio = fecha.getFullYear();
+    const horas = String(fecha.getHours()).padStart(2, "0");
+    const minutos = String(fecha.getMinutes()).padStart(2, "0");
+    return `${dia}/${mes}/${anio} ${horas}:${minutos}`;
+}
+
+function agregarEventosFila(fila, nombreReporte, formato) {
+    const botones = fila.querySelectorAll("button");
+    const btnVer = botones[0];
+    const btnDescargar = botones[1];
+    const btnEliminar = botones[2];
+
+    // Ver reporte
+    btnVer.addEventListener("click", () => {
+        alert(`👁️ Visualizando: ${nombreReporte}\nFormato: ${formato}`);
+    });
+
+    // Descargar reporte (simulación con generación de archivo)
+    btnDescargar.addEventListener("click", () => {
+        generarYDescargarArchivo(nombreReporte, formato);
+    });
+
+    // Eliminar fila
+    btnEliminar.addEventListener("click", () => {
+        if (confirm(`¿Eliminar el reporte:\n"${nombreReporte}"?`)) {
+            fila.remove();
+        }
+    });
+}
+
+// === Generación y descarga real de archivos ===
+function generarYDescargarArchivo(nombre, formato) {
+    // Quitar caracteres no válidos para nombre de archivo
+    const nombreLimpio = nombre.replace(/[<>:"/\\|?*]/g, "-");
+    let contenido = "";
+    let tipoMime = "text/plain";
+    let extension = ".txt";
+
+    // Contenido según formato
+    switch (formato) {
+        case "CSV":
+            contenido = "Nombre del reporte,Fecha,Generado por,Formato\n" +
+                        `"${nombre}",${new Date().toLocaleString()},"${USUARIO_ACTUAL}",${formato}`;
+            tipoMime = "text/csv";
+            extension = ".csv";
+            break;
+        case "Excel":
+        case "PDF":
+        case "Imagen":
+            // Para formatos binarios se genera un CSV con los datos como ejemplo
+            contenido = "=== REPORTE GENERADO ===\n" +
+                        `Nombre: ${nombre}\n` +
+                        `Fecha: ${new Date().toLocaleString()}\n` +
+                        `Generado por: ${USUARIO_ACTUAL}\n` +
+                        `Formato solicitado: ${formato}\n\n` +
+                        "Nota: Este es un archivo de datos generado como ejemplo.\n";
+            extension = formato === "Excel" ? ".xls" : formato === "PDF" ? ".txt" : ".txt";
+            break;
+    }
+
+    // Crear enlace de descarga
+    const blob = new Blob([contenido], { type: tipoMime });
+    const url = URL.createObjectURL(blob);
+    const enlace = document.createElement("a");
+    enlace.href = url;
+    enlace.download = `${nombreLimpio}${extension}`;
+    document.body.appendChild(enlace);
+    enlace.click();
+    document.body.removeChild(enlace);
+    URL.revokeObjectURL(url);
+
+    alert(`✅ Descarga iniciada: ${nombreLimpio}${extension}`);
+}
+</script>

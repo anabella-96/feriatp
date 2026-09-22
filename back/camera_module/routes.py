@@ -38,10 +38,12 @@ def registrar_rostro():
     Hace:
         1. Convierte el id a entero.
         2. Decodifica la imagen base64 a bytes.
-        3. Llama a guardar_rostro() que verifica el rostro, guarda la foto en
+        3. Llama a guardar_rostro() que valida el rostro, verifica que la
+           persona NO esté ya registrada (comparación facial contra todos los
+           rostros conocidos) y, solo si es nuevo, guarda la foto en
            back/imagenes_conocidas/{alumno_id}.jpg y actualiza la memoria.
 
-    Devuelve: {"ok": bool, "mensaje": str}
+    Devuelve: {"ok": bool, "mensaje": str, [ya_registrado, alumno_existente, distancia]}
     """
     # get_json(silent=True) evita una excepción si el cuerpo no es JSON.
     datos = request.get_json(silent=True)
@@ -63,8 +65,13 @@ def registrar_rostro():
         return jsonify({"ok": False, "mensaje": f"Error al decodificar la imagen: {e}"})
 
     # Delegamos la lógica al servicio (guardar + verificar rostro).
-    ok, mensaje = guardar_rostro(alumno_id, imagen_bytes)
-    return jsonify({"ok": ok, "mensaje": mensaje})
+    # La respuesta incluye, cuando la persona ya estaba registrada:
+    #   ya_registrado=True, alumno_existente=<matrícula>, distancia=<valor>
+    ok, mensaje, info = guardar_rostro(alumno_id, imagen_bytes)
+    respuesta = {"ok": ok, "mensaje": mensaje}
+    if info:
+        respuesta.update(info)
+    return jsonify(respuesta)
 
 
 @camera_bp.route("/reconocer", methods=["POST"])
